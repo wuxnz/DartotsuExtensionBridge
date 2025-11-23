@@ -3,7 +3,7 @@
 A Flutter plugin that provides a unified interface for managing multiple extension systems (Aniyomi, Mangayomi, and CloudStream) for streaming and reading content across various media types.
 
 ## Overview
-
+Archi
 The Dartotsu Extension Bridge enables Flutter applications to discover, install, update, and manage extensions from four different extension ecosystems:
 
 - **Aniyomi**: Anime and manga extensions (APK-based)
@@ -59,10 +59,10 @@ The LnReader Extension Bridge is the newest addition, providing comprehensive su
 #### Architecture
 
 ```
-Flutter Application
-        ↓
-ExtensionManager (Coordinator)
-        ↓
+                          Flutter Application
+                                   ↓
+                     ExtensionManager (Coordinator)
+                                   ↓
 ┌───────────────┬──────────────────┬──────────────┬──────────────┐
 │   Aniyomi     │   CloudStream    │  Mangayomi   │  LnReader    │
 │   (APK)       │     (APK)        │    (APK)     │    (JS)      │
@@ -169,10 +169,10 @@ The CloudStream Extension Bridge provides comprehensive support for CloudStream 
 #### Architecture
 
 ```
-Flutter Application
-        ↓
-ExtensionManager (Coordinator)
-        ↓
+                 Flutter Application
+                         ↓
+           ExtensionManager (Coordinator)
+                         ↓
 ┌───────────────┬──────────────────┬──────────────┐
 │   Aniyomi     │   CloudStream    │  Mangayomi   │
 │   Bridge      │     Bridge       │    Bridge    │
