@@ -38,10 +38,6 @@ dependencies:
       url: https://github.com/kodjodevf/epubx.dart.git
       ref: dev
   install_plugin: ^2.1.0
-  device_apps:
-    git:
-      url: https://github.com/g123k/flutter_plugin_device_apps.git
-      ref: master
 dev_dependencies:
   flutter_test:
     sdk: flutter
