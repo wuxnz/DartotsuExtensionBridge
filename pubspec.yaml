@@ -1,6 +1,6 @@
 name: dartotsu_extension_bridge
 description: "A new Flutter plugin project."
-version: 0.0.4
+version: 0.0.5
 homepage:
 publish_to: none
 
@@ -38,7 +38,10 @@ dependencies:
       url: https://github.com/kodjodevf/epubx.dart.git
       ref: dev
   install_plugin: ^2.1.0
-  device_apps: ^2.2.0
+  device_apps:
+    git:
+      url: https://github.com/g123k/flutter_plugin_device_apps.git
+      ref: master
 dev_dependencies:
   flutter_test:
     sdk: flutter
