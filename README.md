@@ -67,10 +67,10 @@ ExtensionManager (Coordinator)
 │   Aniyomi     │   CloudStream    │  Mangayomi   │  LnReader    │
 │   (APK)       │     (APK)        │    (APK)     │    (JS)      │
 └───────┬───────┴────────┬─────────┴──────┬───────┴──────┬───────┘
-        ↓                ↓                 ↓              ↓
-    Platform Channel                              QuickJS Runtime
-        ↓                                              ↓
-    Native Android                            JavaScript Plugins
+        ↓                ↓                ↓              ↓
+                  Platform Channel                QuickJS Runtime
+                         ↓                               ↓
+                   Native Android               JavaScript Plugins
 ```
 
 #### Implementation Details
@@ -177,10 +177,10 @@ ExtensionManager (Coordinator)
 │   Aniyomi     │   CloudStream    │  Mangayomi   │
 │   Bridge      │     Bridge       │    Bridge    │
 └───────┬───────┴────────┬─────────┴──────┬───────┘
-        ↓                ↓                 ↓
-    Platform Channel Layer
-        ↓                ↓                 ↓
-    Native Android Implementation
+        ↓                ↓                ↓
+               Platform Channel Layer
+        ↓                ↓                ↓
+           Native Android Implementation
 ```
 
 #### Implementation Details
