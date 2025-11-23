@@ -221,7 +221,7 @@ dependencies:
   dartotsu_extension_bridge:
     git:
       url: https://github.com/wuxnz/DartotsuExtensionBridge.git
-      ref: main # or specify a tag/commit hash
+      ref: master # or specify a tag/commit hash
 ```
 
 ## Usage
