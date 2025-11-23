@@ -210,7 +210,18 @@ Add this to your package's `pubspec.yaml` file:
 ```yaml
 dependencies:
   dartotsu_extension_bridge:
-    path: ../dartotsu_extension_bridge
+    git:
+      url: https://github.com/wuxnz/DartotsuExtensionBridge.git
+```
+
+To install a specific version or branch:
+
+```yaml
+dependencies:
+  dartotsu_extension_bridge:
+    git:
+      url: https://github.com/wuxnz/DartotsuExtensionBridge.git
+      ref: main # or specify a tag/commit hash
 ```
 
 ## Usage
