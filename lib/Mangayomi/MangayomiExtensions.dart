@@ -55,6 +55,13 @@ class MangayomiExtensions extends Extension {
       case ItemType.novel:
         settings.mangayomiNovelExtensions = repos ?? [];
         break;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        break; // Mangayomi doesn't support these types
     }
     isar.writeTxnSync(() => isar.bridgeSettings.putSync(settings));
 
@@ -166,6 +173,13 @@ class MangayomiExtensions extends Extension {
         return _manager.availableMangaExtensions.value;
       case ItemType.novel:
         return _manager.availableNovelExtensions.value;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        return []; // Mangayomi doesn't support these types
     }
   }
 }

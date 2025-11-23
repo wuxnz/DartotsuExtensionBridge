@@ -5,8 +5,12 @@ import 'package:get/get.dart';
 
 import 'Aniyomi/AniyomiExtensions.dart';
 import 'Aniyomi/AniyomiSourceMethods.dart';
+import 'CloudStream/CloudStreamExtensions.dart';
+import 'CloudStream/CloudStreamSourceMethods.dart';
 import 'Extensions/Extensions.dart';
 import 'Extensions/SourceMethods.dart';
+import 'Lnreader/LnReaderExtensions.dart';
+import 'Lnreader/LnReaderSourceMethods.dart';
 import 'Mangayomi/MangayomiExtensions.dart';
 import 'Mangayomi/MangayomiSourceMethods.dart';
 import 'Models/Source.dart';
@@ -50,17 +54,30 @@ SourceMethods currentSourceMethods(Source source) {
   }
 
   final type = source.extensionType;
-  return type == ExtensionType.mangayomi
-      ? MangayomiSourceMethods(source)
-      : AniyomiSourceMethods(source);
+  switch (type) {
+    case ExtensionType.mangayomi:
+      return MangayomiSourceMethods(source);
+    case ExtensionType.aniyomi:
+      return AniyomiSourceMethods(source);
+    case ExtensionType.cloudstream:
+      return CloudStreamSourceMethods(source);
+    case ExtensionType.lnreader:
+      return LnReaderSourceMethods(source);
+    case null:
+      // Default to Mangayomi for sources without explicit type
+      return MangayomiSourceMethods(source);
+  }
 }
 
-List<ExtensionType> get getSupportedExtensions =>
-    Platform.isAndroid ? ExtensionType.values : [ExtensionType.mangayomi];
+List<ExtensionType> get getSupportedExtensions => Platform.isAndroid
+    ? ExtensionType.values
+    : [ExtensionType.mangayomi, ExtensionType.lnreader];
 
 enum ExtensionType {
   mangayomi,
-  aniyomi;
+  aniyomi,
+  cloudstream,
+  lnreader;
 
   Extension getManager() {
     switch (this) {
@@ -68,6 +85,10 @@ enum ExtensionType {
         return Get.find<AniyomiExtensions>(tag: 'AniyomiExtensions');
       case ExtensionType.mangayomi:
         return Get.find<MangayomiExtensions>(tag: 'MangayomiExtensions');
+      case ExtensionType.cloudstream:
+        return Get.find<CloudStreamExtensions>(tag: 'CloudStreamExtensions');
+      case ExtensionType.lnreader:
+        return Get.find<LnReaderExtensions>(tag: 'LnReaderExtensions');
     }
   }
 
@@ -78,6 +99,10 @@ enum ExtensionType {
         return 'Aniyomi';
       case ExtensionType.mangayomi:
         return 'Mangayomi';
+      case ExtensionType.cloudstream:
+        return 'CloudStream';
+      case ExtensionType.lnreader:
+        return 'LnReader';
     }
   }
 
@@ -93,6 +118,10 @@ enum ExtensionType {
       return ExtensionType.aniyomi;
     } else if (manager is MangayomiExtensions) {
       return ExtensionType.mangayomi;
+    } else if (manager is CloudStreamExtensions) {
+      return ExtensionType.cloudstream;
+    } else if (manager is LnReaderExtensions) {
+      return ExtensionType.lnreader;
     }
     throw Exception('Unknown extension manager type');
   }

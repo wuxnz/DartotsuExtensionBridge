@@ -76,36 +76,41 @@ const MSourceSchema = CollectionSchema(
     r'lang': PropertySchema(id: 19, name: r'lang', type: IsarType.string),
     r'lastUsed': PropertySchema(id: 20, name: r'lastUsed', type: IsarType.bool),
     r'name': PropertySchema(id: 21, name: r'name', type: IsarType.string),
-    r'repo': PropertySchema(id: 22, name: r'repo', type: IsarType.string),
+    r'pluginId': PropertySchema(
+      id: 22,
+      name: r'pluginId',
+      type: IsarType.string,
+    ),
+    r'repo': PropertySchema(id: 23, name: r'repo', type: IsarType.string),
     r'sourceCode': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'sourceCode',
       type: IsarType.string,
     ),
     r'sourceCodeLanguage': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'sourceCodeLanguage',
       type: IsarType.byte,
       enumMap: _MSourcesourceCodeLanguageEnumValueMap,
     ),
     r'sourceCodeUrl': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'sourceCodeUrl',
       type: IsarType.string,
     ),
     r'sourceId': PropertySchema(
-      id: 26,
+      id: 27,
       name: r'sourceId',
       type: IsarType.string,
     ),
     r'typeSource': PropertySchema(
-      id: 27,
+      id: 28,
       name: r'typeSource',
       type: IsarType.string,
     ),
-    r'version': PropertySchema(id: 28, name: r'version', type: IsarType.string),
+    r'version': PropertySchema(id: 29, name: r'version', type: IsarType.string),
     r'versionLast': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'versionLast',
       type: IsarType.string,
     ),
@@ -123,7 +128,7 @@ const MSourceSchema = CollectionSchema(
   getId: _mSourceGetId,
   getLinks: _mSourceGetLinks,
   attach: _mSourceAttach,
-  version: '3.3.0-dev.3',
+  version: '3.3.0',
 );
 
 int _mSourceEstimateSize(
@@ -188,6 +193,12 @@ int _mSourceEstimateSize(
   }
   {
     final value = object.name;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.pluginId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -265,14 +276,15 @@ void _mSourceSerialize(
   writer.writeString(offsets[19], object.lang);
   writer.writeBool(offsets[20], object.lastUsed);
   writer.writeString(offsets[21], object.name);
-  writer.writeString(offsets[22], object.repo);
-  writer.writeString(offsets[23], object.sourceCode);
-  writer.writeByte(offsets[24], object.sourceCodeLanguage.index);
-  writer.writeString(offsets[25], object.sourceCodeUrl);
-  writer.writeString(offsets[26], object.sourceId);
-  writer.writeString(offsets[27], object.typeSource);
-  writer.writeString(offsets[28], object.version);
-  writer.writeString(offsets[29], object.versionLast);
+  writer.writeString(offsets[22], object.pluginId);
+  writer.writeString(offsets[23], object.repo);
+  writer.writeString(offsets[24], object.sourceCode);
+  writer.writeByte(offsets[25], object.sourceCodeLanguage.index);
+  writer.writeString(offsets[26], object.sourceCodeUrl);
+  writer.writeString(offsets[27], object.sourceId);
+  writer.writeString(offsets[28], object.typeSource);
+  writer.writeString(offsets[29], object.version);
+  writer.writeString(offsets[30], object.versionLast);
 }
 
 MSource _mSourceDeserialize(
@@ -306,18 +318,19 @@ MSource _mSourceDeserialize(
     lang: reader.readStringOrNull(offsets[19]),
     lastUsed: reader.readBoolOrNull(offsets[20]),
     name: reader.readStringOrNull(offsets[21]),
-    repo: reader.readStringOrNull(offsets[22]),
-    sourceCode: reader.readStringOrNull(offsets[23]),
+    pluginId: reader.readStringOrNull(offsets[22]),
+    repo: reader.readStringOrNull(offsets[23]),
+    sourceCode: reader.readStringOrNull(offsets[24]),
     sourceCodeLanguage:
         _MSourcesourceCodeLanguageValueEnumMap[reader.readByteOrNull(
-          offsets[24],
+          offsets[25],
         )] ??
         SourceCodeLanguage.dart,
-    sourceCodeUrl: reader.readStringOrNull(offsets[25]),
-    sourceId: reader.readStringOrNull(offsets[26]),
-    typeSource: reader.readStringOrNull(offsets[27]),
-    version: reader.readStringOrNull(offsets[28]),
-    versionLast: reader.readStringOrNull(offsets[29]),
+    sourceCodeUrl: reader.readStringOrNull(offsets[26]),
+    sourceId: reader.readStringOrNull(offsets[27]),
+    typeSource: reader.readStringOrNull(offsets[28]),
+    version: reader.readStringOrNull(offsets[29]),
+    versionLast: reader.readStringOrNull(offsets[30]),
   );
   return object;
 }
@@ -380,13 +393,13 @@ P _mSourceDeserializeProp<P>(
     case 23:
       return (reader.readStringOrNull(offset)) as P;
     case 24:
+      return (reader.readStringOrNull(offset)) as P;
+    case 25:
       return (_MSourcesourceCodeLanguageValueEnumMap[reader.readByteOrNull(
                 offset,
               )] ??
               SourceCodeLanguage.dart)
           as P;
-    case 25:
-      return (reader.readStringOrNull(offset)) as P;
     case 26:
       return (reader.readStringOrNull(offset)) as P;
     case 27:
@@ -395,16 +408,34 @@ P _mSourceDeserializeProp<P>(
       return (reader.readStringOrNull(offset)) as P;
     case 29:
       return (reader.readStringOrNull(offset)) as P;
+    case 30:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-const _MSourceitemTypeEnumValueMap = {'manga': 0, 'anime': 1, 'novel': 2};
+const _MSourceitemTypeEnumValueMap = {
+  'manga': 0,
+  'anime': 1,
+  'novel': 2,
+  'movie': 3,
+  'tvShow': 4,
+  'cartoon': 5,
+  'documentary': 6,
+  'livestream': 7,
+  'nsfw': 8,
+};
 const _MSourceitemTypeValueEnumMap = {
   0: ItemType.manga,
   1: ItemType.anime,
   2: ItemType.novel,
+  3: ItemType.movie,
+  4: ItemType.tvShow,
+  5: ItemType.cartoon,
+  6: ItemType.documentary,
+  7: ItemType.livestream,
+  8: ItemType.nsfw,
 };
 const _MSourcesourceCodeLanguageEnumValueMap = {
   'dart': 0,
@@ -2534,6 +2565,168 @@ extension MSourceQueryFilter
     });
   }
 
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'pluginId'),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'pluginId'),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'pluginId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'pluginId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'pluginId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'pluginId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterFilterCondition> pluginIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'pluginId', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<MSource, MSource, QAfterFilterCondition> repoIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -4002,6 +4195,18 @@ extension MSourceQuerySortBy on QueryBuilder<MSource, MSource, QSortBy> {
     });
   }
 
+  QueryBuilder<MSource, MSource, QAfterSortBy> sortByPluginId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterSortBy> sortByPluginIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginId', Sort.desc);
+    });
+  }
+
   QueryBuilder<MSource, MSource, QAfterSortBy> sortByRepo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'repo', Sort.asc);
@@ -4377,6 +4582,18 @@ extension MSourceQuerySortThenBy
     });
   }
 
+  QueryBuilder<MSource, MSource, QAfterSortBy> thenByPluginId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MSource, MSource, QAfterSortBy> thenByPluginIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginId', Sort.desc);
+    });
+  }
+
   QueryBuilder<MSource, MSource, QAfterSortBy> thenByRepo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'repo', Sort.asc);
@@ -4634,6 +4851,14 @@ extension MSourceQueryWhereDistinct
     });
   }
 
+  QueryBuilder<MSource, MSource, QDistinct> distinctByPluginId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pluginId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<MSource, MSource, QDistinct> distinctByRepo({
     bool caseSensitive = true,
   }) {
@@ -4837,6 +5062,12 @@ extension MSourceQueryProperty
   QueryBuilder<MSource, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<MSource, String?, QQueryOperations> pluginIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pluginId');
     });
   }
 

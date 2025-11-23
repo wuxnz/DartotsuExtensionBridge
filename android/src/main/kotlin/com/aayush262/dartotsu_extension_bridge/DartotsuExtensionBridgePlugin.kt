@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.aayush262.dartotsu_extension_bridge.aniyomi.AniyomiBridge
 import com.aayush262.dartotsu_extension_bridge.aniyomi.AniyomiExtensionManager
+import com.aayush262.dartotsu_extension_bridge.cloudstream.CloudStreamBridge
 import eu.kanade.tachiyomi.network.NetworkHelper
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -19,6 +20,7 @@ import uy.kohesive.injekt.api.addSingletonFactory
 class DartotsuExtensionBridgePlugin : FlutterPlugin {
     private lateinit var context: Context
     private lateinit var aniyomiChannel: MethodChannel
+    private lateinit var cloudstreamChannel: MethodChannel
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         Log.d("PluginDebug", "Plugin attached to engine")
@@ -29,12 +31,17 @@ class DartotsuExtensionBridgePlugin : FlutterPlugin {
         Injekt.addSingletonFactory { NetworkHelper(context).client }
         Injekt.addSingletonFactory { Json { ignoreUnknownKeys = true ;explicitNulls = false }}
         Injekt.addSingletonFactory { AniyomiExtensionManager(context) }
+        
         aniyomiChannel = MethodChannel(binding.binaryMessenger, "aniyomiExtensionBridge")
         aniyomiChannel.setMethodCallHandler(AniyomiBridge(context))
+        
+        cloudstreamChannel = MethodChannel(binding.binaryMessenger, "cloudstreamExtensionBridge")
+        cloudstreamChannel.setMethodCallHandler(CloudStreamBridge(context))
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         aniyomiChannel.setMethodCallHandler(null)
+        cloudstreamChannel.setMethodCallHandler(null)
     }
 
 }

@@ -43,6 +43,13 @@ abstract class ExtensionList<T extends StatefulWidget> extends State<T> {
         sortedList = settings.sortedMangaExtensions;
       case ItemType.novel:
         sortedList = settings.sortedNovelExtensions;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        sortedList = []; // New content types don't have sorted lists yet
     }
   }
 
@@ -70,6 +77,30 @@ abstract class ExtensionList<T extends StatefulWidget> extends State<T> {
           isInstalled
               ? manager.installedNovelExtensions.value
               : manager.availableNovelExtensions.value,
+        ItemType.movie =>
+          isInstalled
+              ? manager.installedMovieExtensions.value
+              : manager.availableMovieExtensions.value,
+        ItemType.tvShow =>
+          isInstalled
+              ? manager.installedTvShowExtensions.value
+              : manager.availableTvShowExtensions.value,
+        ItemType.cartoon =>
+          isInstalled
+              ? manager.installedCartoonExtensions.value
+              : manager.availableCartoonExtensions.value,
+        ItemType.documentary =>
+          isInstalled
+              ? manager.installedDocumentaryExtensions.value
+              : manager.availableDocumentaryExtensions.value,
+        ItemType.livestream =>
+          isInstalled
+              ? manager.installedLivestreamExtensions.value
+              : manager.availableLivestreamExtensions.value,
+        ItemType.nsfw =>
+          isInstalled
+              ? manager.installedNsfwExtensions.value
+              : manager.availableNsfwExtensions.value,
       };
 
       final search = searchQuery.toLowerCase();

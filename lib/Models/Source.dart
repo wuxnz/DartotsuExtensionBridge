@@ -90,7 +90,13 @@ class Source {
 enum ItemType {
   manga,
   anime,
-  novel;
+  novel,
+  movie,
+  tvShow,
+  cartoon,
+  documentary,
+  livestream,
+  nsfw;
 
   @override
   String toString() {
@@ -101,6 +107,18 @@ enum ItemType {
         return 'Anime';
       case ItemType.novel:
         return 'Novel';
+      case ItemType.movie:
+        return 'Movie';
+      case ItemType.tvShow:
+        return 'TV Show';
+      case ItemType.cartoon:
+        return 'Cartoon';
+      case ItemType.documentary:
+        return 'Documentary';
+      case ItemType.livestream:
+        return 'Livestream';
+      case ItemType.nsfw:
+        return 'NSFW';
     }
   }
 }

@@ -12,6 +12,8 @@ class MSource {
 
   String? sourceId;
 
+  String? pluginId;
+
   String? name;
 
   String? baseUrl;
@@ -71,7 +73,8 @@ class MSource {
 
   MSource({
     this.id = 0,
-    this.sourceId = null,
+    this.sourceId,
+    this.pluginId,
     this.name = '',
     this.baseUrl = '',
     this.lang = '',
@@ -113,6 +116,7 @@ class MSource {
     iconUrl = json['iconUrl'];
     id = json['id'] is int ? json['id'] : null;
     sourceId = json['sourceId'].toString();
+    pluginId = json['pluginId'];
     isActive = json['isActive'];
     isAdded = json['isAdded'];
     isFullData = json['isFullData'];
@@ -147,6 +151,7 @@ class MSource {
     'iconUrl': iconUrl,
     'id': id,
     'sourceId': sourceId,
+    'pluginId': pluginId,
     'isActive': isActive,
     'isAdded': isAdded,
     'isFullData': isFullData,

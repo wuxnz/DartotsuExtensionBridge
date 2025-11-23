@@ -27,38 +27,88 @@ const BridgeSettingsSchema = CollectionSchema(
       name: r'aniyomiMangaExtensions',
       type: IsarType.stringList,
     ),
-    r'currentManager': PropertySchema(
+    r'cloudstreamAnimeExtensions': PropertySchema(
       id: 2,
+      name: r'cloudstreamAnimeExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamCartoonExtensions': PropertySchema(
+      id: 3,
+      name: r'cloudstreamCartoonExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamDocumentaryExtensions': PropertySchema(
+      id: 4,
+      name: r'cloudstreamDocumentaryExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamLivestreamExtensions': PropertySchema(
+      id: 5,
+      name: r'cloudstreamLivestreamExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamMangaExtensions': PropertySchema(
+      id: 6,
+      name: r'cloudstreamMangaExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamMovieExtensions': PropertySchema(
+      id: 7,
+      name: r'cloudstreamMovieExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamNovelExtensions': PropertySchema(
+      id: 8,
+      name: r'cloudstreamNovelExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamNsfwExtensions': PropertySchema(
+      id: 9,
+      name: r'cloudstreamNsfwExtensions',
+      type: IsarType.stringList,
+    ),
+    r'cloudstreamTvShowExtensions': PropertySchema(
+      id: 10,
+      name: r'cloudstreamTvShowExtensions',
+      type: IsarType.stringList,
+    ),
+    r'currentManager': PropertySchema(
+      id: 11,
       name: r'currentManager',
       type: IsarType.string,
     ),
+    r'lnreaderNovelExtensions': PropertySchema(
+      id: 12,
+      name: r'lnreaderNovelExtensions',
+      type: IsarType.stringList,
+    ),
     r'mangayomiAnimeExtensions': PropertySchema(
-      id: 3,
+      id: 13,
       name: r'mangayomiAnimeExtensions',
       type: IsarType.stringList,
     ),
     r'mangayomiMangaExtensions': PropertySchema(
-      id: 4,
+      id: 14,
       name: r'mangayomiMangaExtensions',
       type: IsarType.stringList,
     ),
     r'mangayomiNovelExtensions': PropertySchema(
-      id: 5,
+      id: 15,
       name: r'mangayomiNovelExtensions',
       type: IsarType.stringList,
     ),
     r'sortedAnimeExtensions': PropertySchema(
-      id: 6,
+      id: 16,
       name: r'sortedAnimeExtensions',
       type: IsarType.stringList,
     ),
     r'sortedMangaExtensions': PropertySchema(
-      id: 7,
+      id: 17,
       name: r'sortedMangaExtensions',
       type: IsarType.stringList,
     ),
     r'sortedNovelExtensions': PropertySchema(
-      id: 8,
+      id: 18,
       name: r'sortedNovelExtensions',
       type: IsarType.stringList,
     ),
@@ -76,7 +126,7 @@ const BridgeSettingsSchema = CollectionSchema(
   getId: _bridgeSettingsGetId,
   getLinks: _bridgeSettingsGetLinks,
   attach: _bridgeSettingsAttach,
-  version: '3.3.0-dev.3',
+  version: '3.3.0',
 );
 
 int _bridgeSettingsEstimateSize(
@@ -99,10 +149,80 @@ int _bridgeSettingsEstimateSize(
       bytesCount += value.length * 3;
     }
   }
+  bytesCount += 3 + object.cloudstreamAnimeExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamAnimeExtensions.length; i++) {
+      final value = object.cloudstreamAnimeExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamCartoonExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamCartoonExtensions.length; i++) {
+      final value = object.cloudstreamCartoonExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamDocumentaryExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamDocumentaryExtensions.length; i++) {
+      final value = object.cloudstreamDocumentaryExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamLivestreamExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamLivestreamExtensions.length; i++) {
+      final value = object.cloudstreamLivestreamExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamMangaExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamMangaExtensions.length; i++) {
+      final value = object.cloudstreamMangaExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamMovieExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamMovieExtensions.length; i++) {
+      final value = object.cloudstreamMovieExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamNovelExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamNovelExtensions.length; i++) {
+      final value = object.cloudstreamNovelExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamNsfwExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamNsfwExtensions.length; i++) {
+      final value = object.cloudstreamNsfwExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.cloudstreamTvShowExtensions.length * 3;
+  {
+    for (var i = 0; i < object.cloudstreamTvShowExtensions.length; i++) {
+      final value = object.cloudstreamTvShowExtensions[i];
+      bytesCount += value.length * 3;
+    }
+  }
   {
     final value = object.currentManager;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.lnreaderNovelExtensions.length * 3;
+  {
+    for (var i = 0; i < object.lnreaderNovelExtensions.length; i++) {
+      final value = object.lnreaderNovelExtensions[i];
+      bytesCount += value.length * 3;
     }
   }
   bytesCount += 3 + object.mangayomiAnimeExtensions.length * 3;
@@ -158,13 +278,23 @@ void _bridgeSettingsSerialize(
 ) {
   writer.writeStringList(offsets[0], object.aniyomiAnimeExtensions);
   writer.writeStringList(offsets[1], object.aniyomiMangaExtensions);
-  writer.writeString(offsets[2], object.currentManager);
-  writer.writeStringList(offsets[3], object.mangayomiAnimeExtensions);
-  writer.writeStringList(offsets[4], object.mangayomiMangaExtensions);
-  writer.writeStringList(offsets[5], object.mangayomiNovelExtensions);
-  writer.writeStringList(offsets[6], object.sortedAnimeExtensions);
-  writer.writeStringList(offsets[7], object.sortedMangaExtensions);
-  writer.writeStringList(offsets[8], object.sortedNovelExtensions);
+  writer.writeStringList(offsets[2], object.cloudstreamAnimeExtensions);
+  writer.writeStringList(offsets[3], object.cloudstreamCartoonExtensions);
+  writer.writeStringList(offsets[4], object.cloudstreamDocumentaryExtensions);
+  writer.writeStringList(offsets[5], object.cloudstreamLivestreamExtensions);
+  writer.writeStringList(offsets[6], object.cloudstreamMangaExtensions);
+  writer.writeStringList(offsets[7], object.cloudstreamMovieExtensions);
+  writer.writeStringList(offsets[8], object.cloudstreamNovelExtensions);
+  writer.writeStringList(offsets[9], object.cloudstreamNsfwExtensions);
+  writer.writeStringList(offsets[10], object.cloudstreamTvShowExtensions);
+  writer.writeString(offsets[11], object.currentManager);
+  writer.writeStringList(offsets[12], object.lnreaderNovelExtensions);
+  writer.writeStringList(offsets[13], object.mangayomiAnimeExtensions);
+  writer.writeStringList(offsets[14], object.mangayomiMangaExtensions);
+  writer.writeStringList(offsets[15], object.mangayomiNovelExtensions);
+  writer.writeStringList(offsets[16], object.sortedAnimeExtensions);
+  writer.writeStringList(offsets[17], object.sortedMangaExtensions);
+  writer.writeStringList(offsets[18], object.sortedNovelExtensions);
 }
 
 BridgeSettings _bridgeSettingsDeserialize(
@@ -176,13 +306,25 @@ BridgeSettings _bridgeSettingsDeserialize(
   final object = BridgeSettings(
     aniyomiAnimeExtensions: reader.readStringList(offsets[0]) ?? const [],
     aniyomiMangaExtensions: reader.readStringList(offsets[1]) ?? const [],
-    currentManager: reader.readStringOrNull(offsets[2]),
-    mangayomiAnimeExtensions: reader.readStringList(offsets[3]) ?? const [],
-    mangayomiMangaExtensions: reader.readStringList(offsets[4]) ?? const [],
-    mangayomiNovelExtensions: reader.readStringList(offsets[5]) ?? const [],
-    sortedAnimeExtensions: reader.readStringList(offsets[6]) ?? const [],
-    sortedMangaExtensions: reader.readStringList(offsets[7]) ?? const [],
-    sortedNovelExtensions: reader.readStringList(offsets[8]) ?? const [],
+    cloudstreamAnimeExtensions: reader.readStringList(offsets[2]) ?? const [],
+    cloudstreamCartoonExtensions: reader.readStringList(offsets[3]) ?? const [],
+    cloudstreamDocumentaryExtensions:
+        reader.readStringList(offsets[4]) ?? const [],
+    cloudstreamLivestreamExtensions:
+        reader.readStringList(offsets[5]) ?? const [],
+    cloudstreamMangaExtensions: reader.readStringList(offsets[6]) ?? const [],
+    cloudstreamMovieExtensions: reader.readStringList(offsets[7]) ?? const [],
+    cloudstreamNovelExtensions: reader.readStringList(offsets[8]) ?? const [],
+    cloudstreamNsfwExtensions: reader.readStringList(offsets[9]) ?? const [],
+    cloudstreamTvShowExtensions: reader.readStringList(offsets[10]) ?? const [],
+    currentManager: reader.readStringOrNull(offsets[11]),
+    lnreaderNovelExtensions: reader.readStringList(offsets[12]) ?? const [],
+    mangayomiAnimeExtensions: reader.readStringList(offsets[13]) ?? const [],
+    mangayomiMangaExtensions: reader.readStringList(offsets[14]) ?? const [],
+    mangayomiNovelExtensions: reader.readStringList(offsets[15]) ?? const [],
+    sortedAnimeExtensions: reader.readStringList(offsets[16]) ?? const [],
+    sortedMangaExtensions: reader.readStringList(offsets[17]) ?? const [],
+    sortedNovelExtensions: reader.readStringList(offsets[18]) ?? const [],
   );
   object.id = id;
   return object;
@@ -200,7 +342,7 @@ P _bridgeSettingsDeserializeProp<P>(
     case 1:
       return (reader.readStringList(offset) ?? const []) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 3:
       return (reader.readStringList(offset) ?? const []) as P;
     case 4:
@@ -212,6 +354,26 @@ P _bridgeSettingsDeserializeProp<P>(
     case 7:
       return (reader.readStringList(offset) ?? const []) as P;
     case 8:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 9:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 10:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 13:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 14:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 15:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 16:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 17:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 18:
       return (reader.readStringList(offset) ?? const []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -793,6 +955,2214 @@ extension BridgeSettingsQueryFilter
   }
 
   QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamAnimeExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamAnimeExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamAnimeExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamAnimeExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamAnimeExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamAnimeExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamAnimeExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamAnimeExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamAnimeExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamAnimeExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamAnimeExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamAnimeExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamCartoonExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamCartoonExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamCartoonExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamCartoonExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamCartoonExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamCartoonExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamCartoonExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamDocumentaryExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamDocumentaryExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamDocumentaryExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamDocumentaryExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamDocumentaryExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamLivestreamExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamLivestreamExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamLivestreamExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamLivestreamExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamLivestreamExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamLivestreamExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamLivestreamExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamMangaExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamMangaExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamMangaExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamMangaExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamMangaExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMangaExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamMangaExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMangaExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMangaExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMangaExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMangaExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMangaExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamMovieExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamMovieExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamMovieExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamMovieExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamMovieExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMovieExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamMovieExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMovieExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMovieExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMovieExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamMovieExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamMovieExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamNovelExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamNovelExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamNovelExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamNovelExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNovelExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamNovelExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNovelExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNovelExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNovelExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNovelExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNovelExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamNsfwExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamNsfwExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamNsfwExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamNsfwExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamNsfwExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNsfwExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamNsfwExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNsfwExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNsfwExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNsfwExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamNsfwExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamNsfwExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cloudstreamTvShowExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cloudstreamTvShowExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cloudstreamTvShowExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cloudstreamTvShowExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'cloudstreamTvShowExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamTvShowExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'cloudstreamTvShowExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamTvShowExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamTvShowExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamTvShowExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  cloudstreamTvShowExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'cloudstreamTvShowExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
   currentManagerIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1020,6 +3390,245 @@ extension BridgeSettingsQueryFilter
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lnreaderNovelExtensions',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'lnreaderNovelExtensions',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'lnreaderNovelExtensions',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'lnreaderNovelExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'lnreaderNovelExtensions',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lnreaderNovelExtensions',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'lnreaderNovelExtensions', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lnreaderNovelExtensions',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lnreaderNovelExtensions',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lnreaderNovelExtensions',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QAfterFilterCondition>
+  lnreaderNovelExtensionsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lnreaderNovelExtensions',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
       );
     });
   }
@@ -2510,12 +5119,82 @@ extension BridgeSettingsQueryWhereDistinct
   }
 
   QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamAnimeExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamAnimeExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamCartoonExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamCartoonExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamDocumentaryExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamDocumentaryExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamLivestreamExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamLivestreamExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamMangaExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamMangaExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamMovieExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamMovieExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamNovelExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamNovelExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamNsfwExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamNsfwExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByCloudstreamTvShowExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudstreamTvShowExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
   distinctByCurrentManager({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(
         r'currentManager',
         caseSensitive: caseSensitive,
       );
+    });
+  }
+
+  QueryBuilder<BridgeSettings, BridgeSettings, QDistinct>
+  distinctByLnreaderNovelExtensions() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lnreaderNovelExtensions');
     });
   }
 
@@ -2584,10 +5263,80 @@ extension BridgeSettingsQueryProperty
     });
   }
 
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamAnimeExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamAnimeExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamCartoonExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamCartoonExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamDocumentaryExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamDocumentaryExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamLivestreamExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamLivestreamExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamMangaExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamMangaExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamMovieExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamMovieExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamNovelExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamNovelExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamNsfwExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamNsfwExtensions');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  cloudstreamTvShowExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudstreamTvShowExtensions');
+    });
+  }
+
   QueryBuilder<BridgeSettings, String?, QQueryOperations>
   currentManagerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentManager');
+    });
+  }
+
+  QueryBuilder<BridgeSettings, List<String>, QQueryOperations>
+  lnreaderNovelExtensionsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lnreaderNovelExtensions');
     });
   }
 

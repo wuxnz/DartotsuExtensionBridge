@@ -8,7 +8,9 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'Aniyomi/AniyomiExtensions.dart';
+import 'CloudStream/CloudStreamExtensions.dart';
 import 'ExtensionManager.dart';
+import 'Lnreader/LnReaderExtensions.dart';
 import 'Mangayomi/Eval/dart/model/source_preference.dart';
 import 'Mangayomi/MangayomiExtensions.dart';
 import 'Mangayomi/Models/Source.dart';
@@ -41,8 +43,10 @@ class DartotsuExtensionBridge {
 
     if (Platform.isAndroid) {
       Get.put(AniyomiExtensions(), tag: 'AniyomiExtensions');
+      Get.put(CloudStreamExtensions(), tag: 'CloudStreamExtensions');
     }
     Get.put(MangayomiExtensions(), tag: 'MangayomiExtensions');
+    Get.put(LnReaderExtensions(), tag: 'LnReaderExtensions');
     Get.put(ExtensionManager());
     if (Platform.isWindows) {
       final availableVersion = await WebViewEnvironment.getAvailableVersion();

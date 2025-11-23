@@ -8,13 +8,31 @@ abstract class Extension extends GetxController {
   bool get supportsAnime => true;
   bool get supportsManga => true;
   bool get supportsNovel => true;
+  bool get supportsMovie => false;
+  bool get supportsTvShow => false;
+  bool get supportsCartoon => false;
+  bool get supportsDocumentary => false;
+  bool get supportsLivestream => false;
+  bool get supportsNsfw => false;
 
   final Rx<List<Source>> installedAnimeExtensions = Rx([]);
   final Rx<List<Source>> installedMangaExtensions = Rx([]);
   final Rx<List<Source>> installedNovelExtensions = Rx([]);
+  final Rx<List<Source>> installedMovieExtensions = Rx([]);
+  final Rx<List<Source>> installedTvShowExtensions = Rx([]);
+  final Rx<List<Source>> installedCartoonExtensions = Rx([]);
+  final Rx<List<Source>> installedDocumentaryExtensions = Rx([]);
+  final Rx<List<Source>> installedLivestreamExtensions = Rx([]);
+  final Rx<List<Source>> installedNsfwExtensions = Rx([]);
   final Rx<List<Source>> availableAnimeExtensions = Rx([]);
   final Rx<List<Source>> availableMangaExtensions = Rx([]);
   final Rx<List<Source>> availableNovelExtensions = Rx([]);
+  final Rx<List<Source>> availableMovieExtensions = Rx([]);
+  final Rx<List<Source>> availableTvShowExtensions = Rx([]);
+  final Rx<List<Source>> availableCartoonExtensions = Rx([]);
+  final Rx<List<Source>> availableDocumentaryExtensions = Rx([]);
+  final Rx<List<Source>> availableLivestreamExtensions = Rx([]);
+  final Rx<List<Source>> availableNsfwExtensions = Rx([]);
 
   Future<List<Source>> getInstalledAnimeExtensions() => Future.value([]);
 
@@ -29,6 +47,38 @@ abstract class Extension extends GetxController {
   Future<List<Source>> getInstalledNovelExtensions() => Future.value([]);
 
   Future<List<Source>> fetchAvailableNovelExtensions(List<String>? repos) =>
+      Future.value([]);
+
+  Future<List<Source>> getInstalledMovieExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableMovieExtensions(List<String>? repos) =>
+      Future.value([]);
+
+  Future<List<Source>> getInstalledTvShowExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableTvShowExtensions(List<String>? repos) =>
+      Future.value([]);
+
+  Future<List<Source>> getInstalledCartoonExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableCartoonExtensions(List<String>? repos) =>
+      Future.value([]);
+
+  Future<List<Source>> getInstalledDocumentaryExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableDocumentaryExtensions(
+    List<String>? repos,
+  ) => Future.value([]);
+
+  Future<List<Source>> getInstalledLivestreamExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableLivestreamExtensions(
+    List<String>? repos,
+  ) => Future.value([]);
+
+  Future<List<Source>> getInstalledNsfwExtensions() => Future.value([]);
+
+  Future<List<Source>> fetchAvailableNsfwExtensions(List<String>? repos) =>
       Future.value([]);
 
   Future<void> initialize();
@@ -51,6 +101,24 @@ abstract class Extension extends GetxController {
       case ItemType.novel:
         await fetchAvailableNovelExtensions(repoUrl);
         break;
+      case ItemType.movie:
+        await fetchAvailableMovieExtensions(repoUrl);
+        break;
+      case ItemType.tvShow:
+        await fetchAvailableTvShowExtensions(repoUrl);
+        break;
+      case ItemType.cartoon:
+        await fetchAvailableCartoonExtensions(repoUrl);
+        break;
+      case ItemType.documentary:
+        await fetchAvailableDocumentaryExtensions(repoUrl);
+        break;
+      case ItemType.livestream:
+        await fetchAvailableLivestreamExtensions(repoUrl);
+        break;
+      case ItemType.nsfw:
+        await fetchAvailableNsfwExtensions(repoUrl);
+        break;
     }
   }
 
@@ -62,6 +130,18 @@ abstract class Extension extends GetxController {
         return installedMangaExtensions;
       case ItemType.novel:
         return installedNovelExtensions;
+      case ItemType.movie:
+        return installedMovieExtensions;
+      case ItemType.tvShow:
+        return installedTvShowExtensions;
+      case ItemType.cartoon:
+        return installedCartoonExtensions;
+      case ItemType.documentary:
+        return installedDocumentaryExtensions;
+      case ItemType.livestream:
+        return installedLivestreamExtensions;
+      case ItemType.nsfw:
+        return installedNsfwExtensions;
     }
   }
 
@@ -73,6 +153,18 @@ abstract class Extension extends GetxController {
         return availableMangaExtensions;
       case ItemType.novel:
         return availableNovelExtensions;
+      case ItemType.movie:
+        return availableMovieExtensions;
+      case ItemType.tvShow:
+        return availableTvShowExtensions;
+      case ItemType.cartoon:
+        return availableCartoonExtensions;
+      case ItemType.documentary:
+        return availableDocumentaryExtensions;
+      case ItemType.livestream:
+        return availableLivestreamExtensions;
+      case ItemType.nsfw:
+        return availableNsfwExtensions;
     }
   }
 
@@ -84,6 +176,18 @@ abstract class Extension extends GetxController {
         return installedMangaExtensions;
       case ItemType.novel:
         return installedNovelExtensions;
+      case ItemType.movie:
+        return installedMovieExtensions;
+      case ItemType.tvShow:
+        return installedTvShowExtensions;
+      case ItemType.cartoon:
+        return installedCartoonExtensions;
+      case ItemType.documentary:
+        return installedDocumentaryExtensions;
+      case ItemType.livestream:
+        return installedLivestreamExtensions;
+      case ItemType.nsfw:
+        return installedNsfwExtensions;
     }
   }
 

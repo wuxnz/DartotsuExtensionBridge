@@ -104,6 +104,13 @@ class MangayomiExtensionManager extends GetxController {
       case ItemType.novel:
         availableNovelExtensions.value = sources;
         break;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        break; // Mangayomi doesn't support these types
     }
 
     return sources;
@@ -235,6 +242,13 @@ class MangayomiExtensionManager extends GetxController {
           (source) => source.sourceId == id,
           orElse: () => throw Exception('Source not found'),
         );
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        throw Exception('Mangayomi does not support this content type');
     }
   }
 
@@ -251,6 +265,12 @@ class MangayomiExtensionManager extends GetxController {
           orElse: () => throw Exception('Source not found'),
         );
       case ItemType.novel:
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
         return installedNovelExtensions.value.firstWhere(
           (source) => source.sourceId == id,
           orElse: () => throw Exception('Source not found'),

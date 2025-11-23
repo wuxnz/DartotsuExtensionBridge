@@ -57,7 +57,13 @@ class AniyomiExtensions extends Extension {
         settings.aniyomiMangaExtensions = repos ?? [];
         break;
       case ItemType.novel:
-        break;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
+        break; // Aniyomi doesn't support these types
     }
     isar.writeTxnSync(() => isar.bridgeSettings.putSync(settings));
 
@@ -300,8 +306,14 @@ class AniyomiExtensions extends Extension {
             .where((e) => e.name != source.name)
             .toList();
         break;
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
       case null:
-        break;
+        break; // Aniyomi doesn't support these types
     }
   }
 
@@ -312,6 +324,12 @@ class AniyomiExtensions extends Extension {
       case ItemType.manga:
         return availableMangaExtensionsUnmodified;
       case ItemType.novel:
+      case ItemType.movie:
+      case ItemType.tvShow:
+      case ItemType.cartoon:
+      case ItemType.documentary:
+      case ItemType.livestream:
+      case ItemType.nsfw:
         return availableNovelExtensionsUnmodified;
     }
   }
