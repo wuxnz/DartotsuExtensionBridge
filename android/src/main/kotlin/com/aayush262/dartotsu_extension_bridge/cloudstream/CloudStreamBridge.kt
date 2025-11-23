@@ -101,7 +101,7 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
         itemType: Int,
         packageManager: PackageManager
     ): Map<String, Any?> {
-        val appInfo = pkg.applicationInfo
+        val appInfo = pkg.applicationInfo ?: return emptyMap()
         val name = packageManager.getApplicationLabel(appInfo).toString()
         val version = pkg.versionName ?: "Unknown"
         val packageName = pkg.packageName
@@ -123,7 +123,7 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
         val lang = extractLanguageFromPackage(packageName)
         
         // Check if NSFW from metadata or package name
-        val isNsfw = pkg.applicationInfo.metaData?.getBoolean("nsfw", false) ?: false
+        val isNsfw = appInfo.metaData?.getBoolean("nsfw", false) ?: false
 
         return mapOf(
             "id" to packageName,
