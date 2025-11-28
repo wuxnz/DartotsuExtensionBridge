@@ -49,7 +49,15 @@ class MangayomiExtensionManager extends GetxController {
         debugPrint("Failed to fetch sources from $repo: ${req.statusCode}");
         continue;
       }
-      final sourceList = (jsonDecode(req.body) as List)
+      final decoded = jsonDecode(req.body);
+      if (decoded is! List) {
+        debugPrint(
+          'Expected a list of extensions from $repo but received ${decoded.runtimeType}.',
+        );
+        continue;
+      }
+
+      final sourceList = decoded
           .map((e) {
             if (e['id'] is String &&
                 e['name'] != null &&

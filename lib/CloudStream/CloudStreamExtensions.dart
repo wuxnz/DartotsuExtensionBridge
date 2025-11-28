@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
-import 'package:device_apps/device_apps.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_device_apps/flutter_device_apps.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:http/http.dart' as http;
 import 'package:install_plugin/install_plugin.dart';
@@ -203,32 +203,10 @@ class CloudStreamExtensions extends Extension {
 
       for (final repoUrl in repos) {
         try {
-          // Network operation with error handling (Requirement 12.1)
-          final response = await http.get(Uri.parse(repoUrl));
-
-          if (response.statusCode == 200) {
-            // Parse JSON response (Requirement 2.3)
-            final List<dynamic> jsonList = json.decode(response.body);
-
-            final sources = await compute(parseSources, {
-              'jsonList': jsonList,
-              'type': type.index,
-            });
-
-            allSources.addAll(sources);
-            debugPrint(
-              'Successfully fetched ${sources.length} extensions from $repoUrl',
-            );
-          } else {
-            // Include HTTP status code in error message (Requirement 12.2)
-            debugPrint(
-              'Failed to fetch from $repoUrl: HTTP ${response.statusCode}',
-            );
-          }
+          final sources = await _fetchSourcesForRepo(repoUrl, type);
+          allSources.addAll(sources);
         } catch (e) {
-          // Log network errors with context (Requirement 12.1, 12.5)
           debugPrint('Error fetching from $repoUrl: $e');
-          // Continue with other repositories even if one fails
         }
       }
 
@@ -236,6 +214,12 @@ class CloudStreamExtensions extends Extension {
       final installedIds = getInstalledRx(type).value.map((e) => e.id).toSet();
       final filteredSources = allSources
           .where((s) => !installedIds.contains(s.id))
+          .fold<Map<String, Source>>({}, (map, source) {
+            final key = '${source.id}_${type.index}';
+            map[key] = source;
+            return map;
+          })
+          .values
           .toList();
 
       // Store unmodified list for later use (e.g., when uninstalling)
@@ -284,6 +268,193 @@ class CloudStreamExtensions extends Extension {
       debugPrint('Error in _fetchAvailable for $type: $e');
       return [];
     }
+  }
+
+  Future<List<Source>> _fetchSourcesForRepo(
+    String repoUrl,
+    ItemType type,
+  ) async {
+    final uri = Uri.tryParse(repoUrl);
+    if (uri == null) {
+      debugPrint('Invalid CloudStream repo URL: $repoUrl');
+      return [];
+    }
+
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      debugPrint('Failed to fetch from $repoUrl: HTTP ${response.statusCode}');
+      return [];
+    }
+
+    final body = response.body;
+    dynamic decoded;
+    try {
+      decoded = json.decode(body);
+    } catch (e) {
+      debugPrint('Invalid JSON from $repoUrl: $e');
+      return [];
+    }
+
+    if (decoded is List) {
+      return await compute(parseSources, {
+        'jsonList': decoded,
+        'type': type.index,
+      });
+    }
+
+    if (decoded is Map<String, dynamic>) {
+      final pluginLists = (decoded['pluginLists'] as List?)
+          ?.map((e) => e?.toString())
+          .whereType<String>()
+          .toList();
+
+      if (pluginLists == null || pluginLists.isEmpty) {
+        debugPrint(
+          'Manifest at $repoUrl did not contain pluginLists; skipping.',
+        );
+        return [];
+      }
+
+      final List<Source> manifestSources = [];
+      for (final pluginListUrl in pluginLists) {
+        manifestSources.addAll(
+          await _fetchSourcesFromPluginList(
+            pluginListUrl,
+            type,
+            repoUrl,
+            decoded['name']?.toString(),
+          ),
+        );
+      }
+      return manifestSources;
+    }
+
+    debugPrint(
+      'Unsupported payload from $repoUrl (${decoded.runtimeType}); skipping.',
+    );
+    return [];
+  }
+
+  Future<List<Source>> _fetchSourcesFromPluginList(
+    String pluginListUrl,
+    ItemType type,
+    String repoUrl,
+    String? repoName,
+  ) async {
+    final uri = Uri.tryParse(pluginListUrl);
+    if (uri == null) {
+      debugPrint('Invalid plugin list URL: $pluginListUrl');
+      return [];
+    }
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        debugPrint(
+          'Failed to fetch plugin list $pluginListUrl: HTTP ${response.statusCode}',
+        );
+        return [];
+      }
+
+      final decoded = json.decode(response.body);
+      if (decoded is! List) {
+        debugPrint('Plugin list $pluginListUrl is not an array.');
+        return [];
+      }
+
+      final List<Source> sources = [];
+      for (final entry in decoded) {
+        if (entry is! Map) continue;
+        final map = Map<String, dynamic>.from(entry);
+        final tvTypes = (map['tvTypes'] as List?)
+            ?.map((e) => e?.toString())
+            .whereType<String>()
+            .toList();
+        if (!_pluginMatchesType(tvTypes, type)) continue;
+
+        final source = _mapPluginToSource(
+          plugin: map,
+          type: type,
+          repoUrl: repoUrl,
+          repoName: repoName,
+        );
+        if (source != null) {
+          sources.add(source);
+        }
+      }
+      return sources;
+    } catch (e) {
+      debugPrint('Error parsing plugin list $pluginListUrl: $e');
+      return [];
+    }
+  }
+
+  bool _pluginMatchesType(List<String>? tvTypes, ItemType type) {
+    if (tvTypes == null || tvTypes.isEmpty) {
+      // If plugin does not specify tvTypes, allow it for all tabs
+      return true;
+    }
+
+    final matches = <ItemType, List<String>>{
+      ItemType.anime: ['Anime', 'AnimeMovie', 'OVA'],
+      ItemType.manga: ['Manga'],
+      ItemType.novel: ['AudioBook', 'Audio', 'Podcast'],
+      ItemType.movie: ['Movie', 'AnimeMovie', 'Torrent'],
+      ItemType.tvShow: ['TvSeries', 'AsianDrama'],
+      ItemType.cartoon: ['Cartoon'],
+      ItemType.documentary: ['Documentary'],
+      ItemType.livestream: ['Live'],
+      ItemType.nsfw: ['NSFW'],
+    };
+
+    final allowed = matches[type];
+    if (allowed == null) {
+      return true;
+    }
+
+    return tvTypes.any((tvType) => allowed.contains(tvType));
+  }
+
+  Source? _mapPluginToSource({
+    required Map<String, dynamic> plugin,
+    required ItemType type,
+    required String repoUrl,
+    required String? repoName,
+  }) {
+    final url = plugin['url']?.toString();
+    final internalName = plugin['internalName']?.toString();
+    final name = plugin['name']?.toString();
+    if (url == null || internalName == null || name == null) {
+      return null;
+    }
+
+    final data = <String, dynamic>{
+      'id': internalName,
+      'name': name,
+      'lang': plugin['language'],
+      'iconUrl': plugin['iconUrl'],
+      'version': plugin['version']?.toString(),
+      'versionLast': plugin['version']?.toString(),
+      'itemType': type.index,
+      'isNsfw': (plugin['tvTypes'] as List?)?.contains('NSFW') ?? false,
+      'apkUrl': url,
+      'repo': repoUrl,
+      'baseUrl': plugin['repositoryUrl'] ?? repoUrl,
+      'extensionType': ExtensionType.cloudstream.index,
+      'hasUpdate': false,
+    };
+
+    // best-effort apk name for installer UI
+    data['apkName'] = url.split('/').last;
+
+    final source = Source.fromJson(data)
+      ..extensionType = ExtensionType.cloudstream
+      ..itemType = type;
+
+    if (repoName != null && repoName.isNotEmpty) {
+      source.repo = repoName;
+    }
+
+    return source;
   }
 
   /// Static method to parse JSON sources in an isolate
@@ -624,7 +795,7 @@ class CloudStreamExtensions extends Extension {
       debugPrint('Uninstalling extension: ${source.name} (${source.id})');
 
       // Check if package is installed using DeviceApps.isAppInstalled (Requirement 5.3)
-      final isInstalled = await DeviceApps.isAppInstalled(source.id!);
+      final isInstalled = await _isPackageInstalled(source.id!);
 
       // If not installed, call removeFromInstalledList and return successfully (Requirement 5.4)
       if (!isInstalled) {
@@ -634,7 +805,9 @@ class CloudStreamExtensions extends Extension {
       }
 
       // If installed, call DeviceApps.uninstallApp to initiate uninstallation (Requirement 5.5)
-      final uninstallInitiated = await DeviceApps.uninstallApp(source.id!);
+      final uninstallInitiated = await FlutterDeviceApps.uninstallApp(
+        source.id!,
+      );
 
       if (!uninstallInitiated) {
         throw Exception('Failed to initiate uninstallation for ${source.id}');
@@ -650,7 +823,7 @@ class CloudStreamExtensions extends Extension {
         // 20 iterations * 500ms = 10 seconds
         await Future.delayed(const Duration(milliseconds: 500));
 
-        final stillInstalled = await DeviceApps.isAppInstalled(source.id!);
+        final stillInstalled = await _isPackageInstalled(source.id!);
         if (!stillInstalled) {
           packageRemoved = true;
           break;
@@ -782,5 +955,10 @@ class CloudStreamExtensions extends Extension {
         }
       }
     }
+  }
+
+  Future<bool> _isPackageInstalled(String packageName) async {
+    final appInfo = await FlutterDeviceApps.getApp(packageName);
+    return appInfo != null;
   }
 }

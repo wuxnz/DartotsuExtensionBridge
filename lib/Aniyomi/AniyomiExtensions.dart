@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
-import 'package:device_apps/device_apps.dart';
+import 'package:flutter_device_apps/flutter_device_apps.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
@@ -192,13 +192,13 @@ class AniyomiExtensions extends Extension {
     }
 
     try {
-      final isInstalled = await DeviceApps.isAppInstalled(packageName);
+      final isInstalled = await _isPackageInstalled(packageName);
       if (!isInstalled) {
         _removeFromInstalledList(source);
         return;
       }
 
-      final success = await DeviceApps.uninstallApp(packageName);
+      final success = await FlutterDeviceApps.uninstallApp(packageName);
       if (!success) {
         throw Exception('Failed to initiate uninstallation for: $packageName');
       }
@@ -207,12 +207,12 @@ class AniyomiExtensions extends Extension {
       final start = DateTime.now();
 
       while (DateTime.now().difference(start) < timeout) {
-        final stillInstalled = await DeviceApps.isAppInstalled(packageName);
+        final stillInstalled = await _isPackageInstalled(packageName);
         if (!stillInstalled) break;
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      final finalCheck = await DeviceApps.isAppInstalled(packageName);
+      final finalCheck = await _isPackageInstalled(packageName);
       if (finalCheck) {
         throw Exception('Uninstallation timed out or was cancelled by user.');
       }
@@ -365,5 +365,10 @@ class AniyomiExtensions extends Extension {
 
     final cleanedUrl = baseUrl.substring(0, lastSlash);
     return '$cleanedUrl/$apkName';
+  }
+
+  Future<bool> _isPackageInstalled(String packageName) async {
+    final appInfo = await FlutterDeviceApps.getApp(packageName);
+    return appInfo != null;
   }
 }

@@ -1,6 +1,6 @@
 name: dartotsu_extension_bridge
 description: "A new Flutter plugin project."
-version: 0.0.5
+version: 0.0.6
 homepage:
 publish_to: none
 
@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   http: ^1.4.0
+  flutter_device_apps: ^0.3.1
+  install_plugin: ^2.1.0
   isar_community: ^3.3.0-dev.2
   isar_community_flutter_libs: ^3.3.0-dev.2
   d4rt: ^0.1.7
