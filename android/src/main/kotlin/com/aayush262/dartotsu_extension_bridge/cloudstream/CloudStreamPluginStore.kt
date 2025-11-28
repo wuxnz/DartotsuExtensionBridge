@@ -31,42 +31,43 @@ class CloudStreamPluginStore(private val context: Context) {
     private val metadataFile: File
         get() = File(rootDir, METADATA_FILE_NAME)
 
-    suspend fun listPlugins(): List<CloudStreamPluginMetadata> = performIo {
-        if (!metadataFile.exists()) return@performIo emptyList()
-
-        return@performIo runCatching {
-            json.decodeFromString<List<CloudStreamPluginMetadata>>(metadataFile.readText())
-        }.getOrElse { error ->
-            Log.e(STORE_TAG, "Failed to parse plugin metadata: ${error.message}", error)
-            emptyList()
+    suspend fun listPlugins(): List<CloudStreamPluginMetadata> = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            readMetadata()
         }
     }
 
-    suspend fun upsertPlugin(metadata: CloudStreamPluginMetadata): CloudStreamPluginMetadata = performIo {
-        val current = listPlugins().associateBy { it.internalName }.toMutableMap()
-        val updated = metadata.copy(
-            lastUpdated = metadata.lastUpdated ?: System.currentTimeMillis()
-        )
-        current[updated.internalName] = updated
-        writeMetadata(current.values.toList())
-        updated
-    }
-
-    suspend fun removePlugin(internalName: String): Boolean = performIo {
-        val current = listPlugins()
-        if (current.isEmpty()) return@performIo false
-
-        val remaining = current.filterNot { it.internalName == internalName }
-        val removed = remaining.size != current.size
-        if (removed) {
-            writeMetadata(remaining)
-            deletePluginDirectory(internalName)
+    suspend fun upsertPlugin(metadata: CloudStreamPluginMetadata): CloudStreamPluginMetadata = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            val current = readMetadata().associateBy { it.internalName }.toMutableMap()
+            val updated = metadata.copy(
+                lastUpdated = metadata.lastUpdated ?: System.currentTimeMillis()
+            )
+            current[updated.internalName] = updated
+            writeMetadata(current.values.toList())
+            updated
         }
-        removed
     }
 
-    suspend fun getPlugin(internalName: String): CloudStreamPluginMetadata? = performIo {
-        listPlugins().firstOrNull { it.internalName == internalName }
+    suspend fun removePlugin(internalName: String): Boolean = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            val current = readMetadata()
+            if (current.isEmpty()) return@withContext false
+
+            val remaining = current.filterNot { it.internalName == internalName }
+            val removed = remaining.size != current.size
+            if (removed) {
+                writeMetadata(remaining)
+                deletePluginDirectory(internalName)
+            }
+            removed
+        }
+    }
+
+    suspend fun getPlugin(internalName: String): CloudStreamPluginMetadata? = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            readMetadata().firstOrNull { it.internalName == internalName }
+        }
     }
 
     fun resolvePluginDirectory(repoKey: String?, internalName: String): File {
@@ -79,8 +80,11 @@ class CloudStreamPluginStore(private val context: Context) {
     }
 
     fun resolveBundlePath(repoKey: String?, internalName: String, extension: String = "cs3"): File {
-        val dir = resolvePluginDirectory(repoKey, internalName)
-        return File(dir, "${sanitizeFileName(internalName)}.$extension")
+        val repoSegment = repoKey?.let(::sanitizeDirectoryName) ?: "manual"
+        val bundlesDir = File(rootDir, "bundles/$repoSegment").apply {
+            if (!exists()) mkdirs()
+        }
+        return File(bundlesDir, "${sanitizeFileName(internalName)}.$extension")
     }
 
     private fun deletePluginDirectory(internalName: String) {
@@ -93,13 +97,20 @@ class CloudStreamPluginStore(private val context: Context) {
         }
     }
 
-    private suspend fun writeMetadata(entries: List<CloudStreamPluginMetadata>) {
-        if (!rootDir.exists()) rootDir.mkdirs()
-        metadataFile.writeText(json.encodeToString(entries))
+    private fun readMetadata(): List<CloudStreamPluginMetadata> {
+        if (!metadataFile.exists()) return emptyList()
+
+        return runCatching {
+            json.decodeFromString<List<CloudStreamPluginMetadata>>(metadataFile.readText())
+        }.getOrElse { error ->
+            Log.e(STORE_TAG, "Failed to parse plugin metadata: ${error.message}", error)
+            emptyList()
+        }
     }
 
-    private suspend fun <T> performIo(block: suspend () -> T): T = mutex.withLock {
-        withContext(Dispatchers.IO) { block() }
+    private fun writeMetadata(entries: List<CloudStreamPluginMetadata>) {
+        if (!rootDir.exists()) rootDir.mkdirs()
+        metadataFile.writeText(json.encodeToString(entries))
     }
 
     private fun sanitizeDirectoryName(raw: String): String {

@@ -11,6 +11,57 @@ import 'package:install_plugin/install_plugin.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+class CloudStreamExtensionGroup {
+  CloudStreamExtensionGroup({
+    required this.id,
+    required this.name,
+    required this.itemType,
+    required this.repoUrl,
+    required this.pluginListUrl,
+    this.repoName,
+    required this.pluginCount,
+  });
+
+  final String id;
+  final String name;
+  final ItemType itemType;
+  final String repoUrl;
+  final String pluginListUrl;
+  final String? repoName;
+  final int pluginCount;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'itemType': itemType.index,
+    'repoUrl': repoUrl,
+    'pluginListUrl': pluginListUrl,
+    'repoName': repoName,
+    'pluginCount': pluginCount,
+  };
+}
+
+class _PluginListEntry {
+  const _PluginListEntry({required this.url, this.displayName});
+
+  final String url;
+  final String? displayName;
+}
+
+class CloudStreamGroupInstallResult {
+  CloudStreamGroupInstallResult({
+    required this.group,
+    required this.installed,
+    required this.failures,
+  });
+
+  final CloudStreamExtensionGroup group;
+  final List<String> installed;
+  final Map<String, String> failures;
+
+  bool get isSuccess => failures.isEmpty;
+}
+
 class CloudStreamExtensions extends Extension {
   CloudStreamExtensions() {
     initialize();
@@ -36,6 +87,12 @@ class CloudStreamExtensions extends Extension {
 
   /// Error state for UI feedback
   final Rx<String?> lastError = Rx(null);
+
+  final Map<ItemType, Rx<List<CloudStreamExtensionGroup>>> _availableGroups = {
+    for (final type in ItemType.values) type: Rx(<CloudStreamExtensionGroup>[]),
+  };
+
+  final Map<String, List<Source>> _groupSources = {};
 
   @override
   bool get supportsAnime => true;
@@ -172,6 +229,11 @@ class CloudStreamExtensions extends Extension {
     List<String>? repos,
   ) async {
     try {
+      _availableGroups[type]!.value = [];
+      _groupSources.removeWhere(
+        (key, value) => key.startsWith('${type.index}:'),
+      );
+
       // Persist repository URLs to Isar database (Requirement 2.1)
       final settings = isar.bridgeSettings.getSync(26)!;
 
@@ -285,6 +347,44 @@ class CloudStreamExtensions extends Extension {
     }
   }
 
+  List<CloudStreamExtensionGroup> getAvailableGroups(ItemType type) =>
+      _availableGroups[type]!.value;
+
+  Rx<List<CloudStreamExtensionGroup>> getAvailableGroupsRx(ItemType type) =>
+      _availableGroups[type]!;
+
+  Future<CloudStreamGroupInstallResult> installExtensionGroup(
+    CloudStreamExtensionGroup group, {
+    bool continueOnError = true,
+  }) async {
+    final sources = _groupSources[group.id];
+    if (sources == null || sources.isEmpty) {
+      throw Exception('No sources cached for group ${group.name}');
+    }
+
+    final installed = <String>[];
+    final failures = <String, String>{};
+
+    for (final source in List<Source>.from(sources)) {
+      try {
+        await installSource(source);
+        installed.add(source.name ?? source.id ?? 'unknown');
+      } catch (e) {
+        final key = source.name ?? source.id ?? 'unknown';
+        failures[key] = e.toString();
+        if (!continueOnError) {
+          break;
+        }
+      }
+    }
+
+    return CloudStreamGroupInstallResult(
+      group: group,
+      installed: installed,
+      failures: failures,
+    );
+  }
+
   Future<List<Source>> _fetchSourcesForRepo(
     String repoUrl,
     ItemType type,
@@ -318,12 +418,9 @@ class CloudStreamExtensions extends Extension {
     }
 
     if (decoded is Map<String, dynamic>) {
-      final pluginLists = (decoded['pluginLists'] as List?)
-          ?.map((e) => e?.toString())
-          .whereType<String>()
-          .toList();
+      final pluginLists = _normalizePluginLists(decoded['pluginLists']);
 
-      if (pluginLists == null || pluginLists.isEmpty) {
+      if (pluginLists.isEmpty) {
         debugPrint(
           'Manifest at $repoUrl did not contain pluginLists; skipping.',
         );
@@ -331,15 +428,24 @@ class CloudStreamExtensions extends Extension {
       }
 
       final List<Source> manifestSources = [];
-      for (final pluginListUrl in pluginLists) {
-        manifestSources.addAll(
-          await _fetchSourcesFromPluginList(
-            pluginListUrl,
-            type,
-            repoUrl,
-            decoded['name']?.toString(),
-          ),
+      for (final entry in pluginLists) {
+        final sources = await _fetchSourcesFromPluginList(
+          entry.url,
+          type,
+          repoUrl,
+          decoded['name']?.toString(),
         );
+        if (sources.isNotEmpty) {
+          _registerExtensionGroup(
+            type: type,
+            repoUrl: repoUrl,
+            pluginListUrl: entry.url,
+            repoName: decoded['name']?.toString(),
+            sources: sources,
+            pluginListName: entry.displayName,
+          );
+          manifestSources.addAll(sources);
+        }
       }
       return manifestSources;
     }
@@ -401,6 +507,74 @@ class CloudStreamExtensions extends Extension {
       debugPrint('Error parsing plugin list $pluginListUrl: $e');
       return [];
     }
+  }
+
+  void _registerExtensionGroup({
+    required ItemType type,
+    required String repoUrl,
+    required String pluginListUrl,
+    required List<Source> sources,
+    String? repoName,
+    String? pluginListName,
+  }) {
+    if (sources.isEmpty) return;
+
+    final id = _groupId(type, repoUrl, pluginListUrl);
+    final name = _deriveGroupName(repoName, pluginListUrl, pluginListName);
+
+    _groupSources[id] = List<Source>.from(sources);
+
+    final groups =
+        _availableGroups[type]!.value.where((group) => group.id != id).toList()
+          ..add(
+            CloudStreamExtensionGroup(
+              id: id,
+              name: name,
+              itemType: type,
+              repoUrl: repoUrl,
+              pluginListUrl: pluginListUrl,
+              repoName: repoName,
+              pluginCount: sources.length,
+            ),
+          );
+
+    _availableGroups[type]!.value = groups;
+  }
+
+  String _groupId(ItemType type, String repoUrl, String pluginListUrl) =>
+      '${type.index}:${repoUrl.hashCode}:${pluginListUrl.hashCode}';
+
+  String _deriveGroupName(
+    String? repoName,
+    String pluginListUrl,
+    String? pluginListName,
+  ) {
+    if (pluginListName != null && pluginListName.isNotEmpty) {
+      return pluginListName;
+    }
+    if (repoName != null && repoName.isNotEmpty) {
+      final fileName = pluginListUrl.split('/').last;
+      return '$repoName (${fileName.replaceAll('.json', '')})';
+    }
+    return pluginListUrl.split('/').last.replaceAll('.json', '');
+  }
+
+  List<_PluginListEntry> _normalizePluginLists(dynamic raw) {
+    if (raw is! List) return const <_PluginListEntry>[];
+
+    final entries = <_PluginListEntry>[];
+    for (final entry in raw) {
+      if (entry is String && entry.isNotEmpty) {
+        entries.add(_PluginListEntry(url: entry));
+      } else if (entry is Map) {
+        final map = Map<String, dynamic>.from(entry);
+        final url = map['url']?.toString();
+        if (url == null || url.isEmpty) continue;
+        final name = map['name']?.toString() ?? map['label']?.toString();
+        entries.add(_PluginListEntry(url: url, displayName: name));
+      }
+    }
+    return entries;
   }
 
   bool _pluginMatchesType(List<String>? tvTypes, ItemType type) {

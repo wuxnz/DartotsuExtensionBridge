@@ -3,6 +3,7 @@ package com.aayush262.dartotsu_extension_bridge.cloudstream
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -11,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -46,9 +49,12 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
     private val extractorService = CloudStreamExtractorService.getInstance(context)
     private val httpClient by lazy { OkHttpClient() }
     private val json = Json { ignoreUnknownKeys = true }
+    private val legacyPackageCacheMutex = Mutex()
 
     @Volatile
     private var isInitialized = false
+    @Volatile
+    private var cachedLegacyPackages: List<PackageInfo>? = null
 
     init {
         // Initialize the plugin registry asynchronously
@@ -279,35 +285,93 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
                 return@launch
             }
 
-            // Legacy fallback: scan installed packages
-            try {
-                val packageManager = context.packageManager
-                val installedPackages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
+            // Legacy fallback: scan installed packages in a memory-safe way
+            val packageManager = context.packageManager
+            val legacyPackages = loadLegacyPackages(packageManager)
 
-                val cloudStreamExtensions = installedPackages
-                    .filter { pkg ->
-                        pkg.packageName.startsWith(CLOUDSTREAM_PACKAGE_PREFIX) &&
-                            pkg.packageName != "com.lagradost.cloudstream3"
+            val cloudStreamExtensions = legacyPackages
+                .filter { pkg ->
+                    pkg.packageName.startsWith(CLOUDSTREAM_PACKAGE_PREFIX) &&
+                        pkg.packageName != "com.lagradost.cloudstream3"
+                }
+                .mapNotNull { pkg ->
+                    try {
+                        parseExtensionMetadata(pkg, itemType, packageManager)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing extension ${pkg.packageName}: ${e.message}", e)
+                        null
                     }
-                    .mapNotNull { pkg ->
-                        try {
-                            parseExtensionMetadata(pkg, itemType, packageManager)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error parsing extension ${pkg.packageName}: ${e.message}", e)
-                            null
-                        }
-                    }
+                }
 
-                withContext(Dispatchers.Main) {
-                    result.success(cloudStreamExtensions)
-                    Log.d(TAG, "Returned ${cloudStreamExtensions.size} legacy extensions for itemType $itemType")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting installed extensions: ${e.message}", e)
-                withContext(Dispatchers.Main) {
-                    result.success(emptyList<Map<String, Any?>>())
-                }
+            withContext(Dispatchers.Main) {
+                result.success(cloudStreamExtensions)
+                Log.d(TAG, "Returned ${cloudStreamExtensions.size} legacy extensions for itemType $itemType")
             }
+        }
+    }
+
+    private suspend fun loadLegacyPackages(packageManager: PackageManager): List<PackageInfo> {
+        cachedLegacyPackages?.let { return it }
+
+        return legacyPackageCacheMutex.withLock {
+            cachedLegacyPackages?.let { return it }
+
+            val packages = try {
+                fetchInstalledPackages(packageManager)
+            } catch (e: Exception) {
+                Log.e(TAG, "Bulk package query failed: ${e.message}", e)
+                fetchPackagesIndividually(packageManager)
+            }
+
+            cachedLegacyPackages = packages
+            packages
+        }
+    }
+
+    private fun fetchInstalledPackages(packageManager: PackageManager): List<PackageInfo> {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getInstalledPackages(PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getInstalledPackages(0)
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private fun fetchPackagesIndividually(packageManager: PackageManager): List<PackageInfo> {
+        return try {
+            val apps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getInstalledApplications(0)
+            }
+
+            apps.asSequence()
+                .filter { app ->
+                    app.packageName.startsWith(CLOUDSTREAM_PACKAGE_PREFIX) &&
+                        app.packageName != "com.lagradost.cloudstream3"
+                }
+                .mapNotNull { app ->
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            packageManager.getPackageInfo(app.packageName, PackageManager.PackageInfoFlags.of(0))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            packageManager.getPackageInfo(app.packageName, 0)
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to load package info for ${app.packageName}: ${e.message}")
+                        null
+                    }
+                }
+                .toList()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed fallback package scan: ${e.message}", e)
+            emptyList()
         }
     }
 
@@ -444,6 +508,11 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
                     outFile.parentFile?.mkdirs()
                     FileOutputStream(outFile).use { output ->
                         zipStream.copyTo(output)
+                    }
+
+                    if (entry.name.endsWith(".dex", ignoreCase = true)) {
+                        outFile.setReadable(true, false)
+                        outFile.setWritable(false)
                     }
                 }
                 zipStream.closeEntry()
