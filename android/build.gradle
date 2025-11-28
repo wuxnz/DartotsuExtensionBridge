@@ -1,31 +1,29 @@
-group = "com.aayush262.dartotsu_extension_bridge"
-version = "1.0-SNAPSHOT"
-
-
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "2.2.21"
+
     repositories {
         google()
         mavenCentral()
-
+        gradlePluginPortal()
     }
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.12.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlin_version")
+        classpath("com.codingfeline.buildkonfig:buildkonfig-gradle-plugin:0.17.1")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:2.1.0")
     }
 }
 
+plugins {
+    id "org.jetbrains.kotlin.android" version "2.2.21" apply false
+    id "org.jetbrains.kotlin.plugin.serialization" version "2.2.21" apply false
+}
+
+group = "com.aayush262.dartotsu_extension_bridge"
+version = "1.0-SNAPSHOT"
+
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        /*maven {
-            url 'http://download.flutter.io'
-            allowInsecureProtocol=true
-        }*/
-    }
+    // Repositories managed via settings.gradle
 }
 
 apply plugin: "com.android.library"
@@ -72,6 +70,9 @@ android {
     }
 }
 dependencies {
+    // Flutter embedding for MethodChannel support
+    compileOnly("io.flutter:flutter_embedding_debug:1.0.0-3316dd8728419ad3534e3f6112aa6291f587078a")
+    
     implementation("uy.kohesive.injekt:injekt-core:1.16.1")
     implementation("org.jsoup:jsoup:1.21.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.9.0")
@@ -86,5 +87,6 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime-android:1.8.3'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    //api "io.flutter:flutter_embedding_debug:1.0.0-1d25906b4cf0076604a67360b21b1e092eb01b19"
+
+    implementation project(':cloudstream-library')
 }

@@ -11,9 +11,10 @@ import '../Extensions/SourceMethods.dart';
 
 /// CloudStream-specific implementation of SourceMethods interface.
 ///
-/// This class handles communication with CloudStream extensions installed as APKs
-/// on the Android device. It uses platform channels to invoke native methods that
-/// interact with the CloudStream MainAPI implementations.
+/// This class handles communication with CloudStream extensions loaded via
+/// DexClassLoader. It uses platform channels to invoke native methods that
+/// interact with the CloudStream MainAPI implementations through the
+/// CloudStreamApiRouter.
 class CloudStreamSourceMethods implements SourceMethods {
   static const platform = MethodChannel('cloudstreamExtensionBridge');
 
@@ -30,7 +31,8 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<Pages> getPopular(int page) async {
     try {
-      final result = await platform.invokeMethod('getPopular', {
+      // Use the new cloudstream: prefixed method for loaded plugins
+      final result = await platform.invokeMethod('cloudstream:getPopular', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'page': page,
@@ -49,11 +51,14 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<Pages> getLatestUpdates(int page) async {
     try {
-      final result = await platform.invokeMethod('getLatestUpdates', {
-        'sourceId': source.id,
-        'itemType': source.itemType?.index ?? 1,
-        'page': page,
-      });
+      final result = await platform.invokeMethod(
+        'cloudstream:getLatestUpdates',
+        {
+          'sourceId': source.id,
+          'itemType': source.itemType?.index ?? 1,
+          'page': page,
+        },
+      );
 
       return await compute(
         Pages.fromJson,
@@ -68,7 +73,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<Pages> search(String query, int page, List<dynamic> filters) async {
     try {
-      final result = await platform.invokeMethod('search', {
+      final result = await platform.invokeMethod('cloudstream:search', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'query': query,
@@ -89,7 +94,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<DMedia> getDetail(DMedia media) async {
     try {
-      final result = await platform.invokeMethod('getDetail', {
+      final result = await platform.invokeMethod('cloudstream:getDetail', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'media': {
@@ -116,7 +121,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<Video>> getVideoList(DEpisode episode) async {
     try {
-      final result = await platform.invokeMethod('getVideoList', {
+      final result = await platform.invokeMethod('cloudstream:getVideoList', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'episode': {
@@ -129,6 +134,13 @@ class CloudStreamSourceMethods implements SourceMethods {
         },
       });
 
+      // Handle the new response format with videos and subtitles
+      if (result is Map) {
+        final resultMap = Map<String, dynamic>.from(result);
+        final videos = resultMap['videos'] as List? ?? [];
+        return await compute(_parseVideos, List<dynamic>.from(videos));
+      }
+
       return await compute(_parseVideos, List<dynamic>.from(result));
     } catch (e) {
       debugPrint('Error getting video list: $e');
@@ -139,7 +151,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<PageUrl>> getPageList(DEpisode episode) async {
     try {
-      final result = await platform.invokeMethod('getPageList', {
+      final result = await platform.invokeMethod('cloudstream:getPageList', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'episode': {
@@ -162,12 +174,13 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<String?> getNovelContent(String chapterTitle, String chapterId) async {
     try {
-      final result = await platform.invokeMethod('getNovelContent', {
-        'sourceId': source.id,
-        'itemType': source.itemType?.index ?? 2,
-        'chapterTitle': chapterTitle,
-        'chapterId': chapterId,
-      });
+      final result = await platform
+          .invokeMethod('cloudstream:getNovelContent', {
+            'sourceId': source.id,
+            'itemType': source.itemType?.index ?? 2,
+            'chapterTitle': chapterTitle,
+            'chapterId': chapterId,
+          });
 
       return result as String?;
     } catch (e) {
@@ -179,7 +192,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<SourcePreference>> getPreference() async {
     try {
-      final result = await platform.invokeMethod('getPreference', {
+      final result = await platform.invokeMethod('cloudstream:getPreference', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
       });
@@ -199,7 +212,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<bool> setPreference(SourcePreference pref, dynamic value) async {
     try {
-      final result = await platform.invokeMethod('setPreference', {
+      final result = await platform.invokeMethod('cloudstream:setPreference', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'key': pref.key,
@@ -210,6 +223,39 @@ class CloudStreamSourceMethods implements SourceMethods {
     } catch (e) {
       debugPrint('Error setting preference: $e');
       return false;
+    }
+  }
+
+  /// Extract video links from a URL using CloudStream extractors.
+  /// This is useful when the video URL needs to be processed by an extractor.
+  Future<List<Video>> extractVideos(String url, {String? referer}) async {
+    try {
+      final result = await platform.invokeMethod('cloudstream:extract', {
+        'url': url,
+        'referer': referer,
+      });
+
+      final resultMap = Map<String, dynamic>.from(result as Map);
+      if (resultMap['success'] != true) {
+        debugPrint('Extraction failed: ${resultMap['error']}');
+        return [];
+      }
+
+      final links = resultMap['links'] as List? ?? [];
+      return links.map((link) {
+        final linkMap = Map<String, dynamic>.from(link);
+        return Video(
+          linkMap['name'] as String? ?? 'Unknown',
+          linkMap['url'] as String? ?? '',
+          '${linkMap['quality'] ?? 0}p',
+          headers: (linkMap['headers'] as Map?)?.map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          ),
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint('Error extracting videos: $e');
+      return [];
     }
   }
 

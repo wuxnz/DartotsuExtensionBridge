@@ -9,6 +9,7 @@ import 'package:dartotsu_extension_bridge/Models/Video.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import '../Extensions/SourceMethods.dart';
+import '../Extensions/ExtractorService.dart';
 import '../Models/Page.dart';
 import '../Models/SourcePreference.dart';
 
@@ -246,5 +247,65 @@ SourcePreference mapToSourcePreference(Map<String, dynamic> json) {
 
     default:
       return SourcePreference(key: json['key']);
+  }
+}
+
+/// Extension to add CloudStream extractor support to AniyomiSourceMethods.
+///
+/// This allows Aniyomi sources to use CloudStream's extensive extractor library
+/// when the native Aniyomi extractors don't support a particular video host.
+extension CloudStreamExtractorSupport on AniyomiSourceMethods {
+  /// Extract video links using CloudStream extractors.
+  ///
+  /// Use this when the native Aniyomi extraction fails or when you know
+  /// the video host is better supported by CloudStream extractors.
+  ///
+  /// Example:
+  /// ```dart
+  /// final videos = await sourceMethods.getVideoList(episode);
+  /// if (videos.isEmpty) {
+  ///   // Try CloudStream extractors as fallback
+  ///   final csVideos = await sourceMethods.extractWithCloudStream(videoUrl);
+  ///   videos.addAll(csVideos);
+  /// }
+  /// ```
+  Future<List<Video>> extractWithCloudStream(
+    String url, {
+    String? referer,
+  }) async {
+    try {
+      final extractor = ExtractorService();
+
+      // Check if CloudStream extractors are available
+      if (!await extractor.isInitialized) {
+        debugPrint('CloudStream extractors not initialized');
+        return [];
+      }
+
+      final result = await extractor.extract(url, referer: referer);
+
+      if (!result.success) {
+        debugPrint('CloudStream extraction failed: ${result.error}');
+        return [];
+      }
+
+      // Convert ExtractedLink to Video
+      return result.links.map((link) {
+        return Video(
+          link.name,
+          link.url,
+          link.qualityString,
+          headers: link.headers,
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint('Error using CloudStream extractors: $e');
+      return [];
+    }
+  }
+
+  /// Check if CloudStream has an extractor for the given URL.
+  Future<bool> hasCloudStreamExtractor(String url) async {
+    return ExtractorService().hasExtractorForUrl(url);
   }
 }

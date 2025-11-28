@@ -4,6 +4,7 @@ export './extension_bridge.dart';
 export './ExtensionManager.dart';
 export './Extensions/Extensions.dart';
 export './Extensions/SourceMethods.dart';
+export './Extensions/ExtractorService.dart';
 export './Models/Source.dart';
 export './Models/DEpisode.dart';
 export './Models/DMedia.dart';

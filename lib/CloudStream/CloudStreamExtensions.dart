@@ -28,6 +28,15 @@ class CloudStreamExtensions extends Extension {
   final Rx<List<Source>> availableLivestreamExtensionsUnmodified = Rx([]);
   final Rx<List<Source>> availableNsfwExtensionsUnmodified = Rx([]);
 
+  /// Plugin status from native layer
+  final Rx<Map<String, dynamic>> pluginStatus = Rx({});
+
+  /// Loading state for UI feedback
+  final Rx<bool> isLoading = Rx(false);
+
+  /// Error state for UI feedback
+  final Rx<String?> lastError = Rx(null);
+
   @override
   bool get supportsAnime => true;
 
@@ -60,6 +69,12 @@ class CloudStreamExtensions extends Extension {
     if (isInitialized.value) return;
 
     try {
+      // Initialize native plugin registry first
+      await initializePlugins();
+
+      // Refresh plugin status for UI
+      await refreshPluginStatus();
+
       // Load repository URLs from Isar database
       final settings = isar.bridgeSettings.getSync(26);
 
@@ -545,15 +560,32 @@ class CloudStreamExtensions extends Extension {
   /// Helper method to get installed extensions for a specific content type
   ///
   /// This method:
-  /// 1. Invokes platform channel methods based on content type
-  /// 2. Parses platform response using compute isolate for performance
-  /// 3. Sets extensionType to cloudstream on all parsed Source objects
-  /// 4. Updates appropriate reactive list based on content type
-  /// 5. Calls checkForUpdates after updating installed list
-  /// 6. Handles platform channel failures by returning empty list
+  /// 1. First tries to load from the native plugin registry
+  /// 2. Falls back to legacy platform channel methods if registry is empty
+  /// 3. Parses platform response using compute isolate for performance
+  /// 4. Sets extensionType to cloudstream on all parsed Source objects
+  /// 5. Updates appropriate reactive list based on content type
+  /// 6. Calls checkForUpdates after updating installed list
+  /// 7. Handles platform channel failures by returning empty list
   Future<List<Source>> _getInstalled(ItemType type) async {
     try {
-      // Determine the platform method name based on content type (Requirements 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10)
+      // First, try to load from the native plugin registry
+      final pluginSources = await _loadFromPluginRegistry(type);
+
+      if (pluginSources.isNotEmpty) {
+        // Update appropriate reactive list
+        getInstalledRx(type).value = pluginSources;
+
+        // Check for updates
+        await checkForUpdates(type);
+
+        debugPrint(
+          'Loaded ${pluginSources.length} installed $type extensions from plugin registry',
+        );
+        return pluginSources;
+      }
+
+      // Fall back to legacy platform channel methods
       final String methodName;
       switch (type) {
         case ItemType.anime:
@@ -585,22 +617,95 @@ class CloudStreamExtensions extends Extension {
           break;
       }
 
-      // Load extensions from platform channel (Requirement 3.1)
+      // Load extensions from legacy platform channel
       final sources = await _loadExtensions(methodName, type);
 
-      // Update appropriate reactive list (Requirement 3.3)
+      // Update appropriate reactive list
       getInstalledRx(type).value = sources;
 
-      // Check for updates (Requirement 3.4)
+      // Check for updates
       await checkForUpdates(type);
 
-      debugPrint('Loaded ${sources.length} installed $type extensions');
+      debugPrint(
+        'Loaded ${sources.length} installed $type extensions from legacy platform',
+      );
       return sources;
     } catch (e) {
-      // Handle platform channel failures by returning empty list (Requirement 3.5, 10.6, 12.4)
       debugPrint('Error getting installed extensions for $type: $e');
       return [];
     }
+  }
+
+  /// Load installed extensions from the native plugin registry.
+  /// Filters plugins by their itemTypes/tvTypes to match the requested type.
+  Future<List<Source>> _loadFromPluginRegistry(ItemType type) async {
+    try {
+      final plugins = await listInstalledCloudStreamPlugins();
+      if (plugins.isEmpty) return [];
+
+      final sources = <Source>[];
+      for (final plugin in plugins) {
+        // Check if plugin matches the requested type
+        if (!_pluginMetadataMatchesType(plugin, type)) continue;
+
+        final source = _pluginMetadataToSource(plugin, type);
+        if (source != null) {
+          sources.add(source);
+        }
+      }
+
+      return sources;
+    } catch (e) {
+      debugPrint('Error loading from plugin registry: $e');
+      return [];
+    }
+  }
+
+  /// Check if plugin metadata matches the requested item type.
+  bool _pluginMetadataMatchesType(Map<String, dynamic> plugin, ItemType type) {
+    final tvTypes = (plugin['tvTypes'] as List?)?.cast<String>();
+    final itemTypes = (plugin['itemTypes'] as List?)?.cast<int>();
+
+    // If itemTypes is specified, check directly
+    if (itemTypes != null && itemTypes.isNotEmpty) {
+      return itemTypes.contains(type.index);
+    }
+
+    // Fall back to tvTypes matching
+    if (tvTypes == null || tvTypes.isEmpty) {
+      // If no types specified, include in all tabs
+      return true;
+    }
+
+    return _pluginMatchesType(tvTypes, type);
+  }
+
+  /// Convert plugin metadata from native store to Source object.
+  Source? _pluginMetadataToSource(Map<String, dynamic> plugin, ItemType type) {
+    final internalName = plugin['internalName']?.toString();
+    if (internalName == null) return null;
+
+    final data = <String, dynamic>{
+      'id': internalName,
+      'name': plugin['name'] ?? internalName,
+      'lang': plugin['lang'],
+      'iconUrl': plugin['iconUrl'],
+      'version': plugin['version']?.toString(),
+      'versionLast': plugin['version']?.toString(),
+      'itemType': type.index,
+      'isNsfw': plugin['isNsfw'] ?? false,
+      'repo': plugin['repoUrl'],
+      'baseUrl': plugin['repoUrl'],
+      'localPath': plugin['localPath'],
+      'extensionType': ExtensionType.cloudstream.index,
+      'hasUpdate': false,
+    };
+
+    final source = Source.fromJson(data)
+      ..extensionType = ExtensionType.cloudstream
+      ..itemType = type;
+
+    return source;
   }
 
   /// Helper method to handle platform channel communication
@@ -663,16 +768,102 @@ class CloudStreamExtensions extends Extension {
       return Future.error('Source APK URL is required for installation.');
     }
 
+    final uri = Uri.tryParse(source.apkUrl!.trim());
+    if (uri == null) {
+      return Future.error('Invalid extension URL.');
+    }
+
+    final fileName = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+    final lowerName = fileName.toLowerCase();
+
+    // Check if this is a CloudStream plugin bundle (.cs3/.zip)
+    final isPluginBundle =
+        lowerName.endsWith('.cs3') || lowerName.endsWith('.zip');
+
+    // Route CloudStream plugin bundles through the new native plugin store
+    if (isPluginBundle) {
+      await _installCloudStreamPluginBundle(source, uri, fileName);
+      return;
+    }
+
+    // Legacy APK installation path (for backward compatibility)
+    // This should only be used for non-CloudStream extensions
+    await _installLegacyApk(source, uri, fileName);
+  }
+
+  /// Install a CloudStream plugin bundle (.cs3/.zip) through the native plugin store.
+  Future<void> _installCloudStreamPluginBundle(
+    Source source,
+    Uri uri,
+    String fileName,
+  ) async {
+    try {
+      isLoading.value = true;
+      lastError.value = null;
+
+      final internalName =
+          source.id ?? fileName.replaceAll(RegExp(r'\.(cs3|zip)$'), '');
+      debugPrint(
+        'Installing CloudStream plugin: ${source.name} ($internalName)',
+      );
+
+      // Call the new native plugin installer
+      final result = await installCloudStreamPlugin(
+        internalName: internalName,
+        downloadUrl: source.apkUrl!,
+        repoUrl: source.repo,
+        version: source.version,
+        lang: source.lang,
+        isNsfw: source.isNsfw ?? false,
+        itemTypes: source.itemType != null ? [source.itemType!.index] : null,
+      );
+
+      if (result == null) {
+        throw Exception(lastError.value ?? 'Installation failed');
+      }
+
+      // Remove extension from available list on success
+      _removeFromAvailableLists(source);
+
+      // Refresh plugin status
+      await refreshPluginStatus();
+
+      debugPrint('Successfully installed CloudStream plugin: ${source.name}');
+    } catch (e) {
+      lastError.value = 'Failed to install plugin: $e';
+      debugPrint('Error installing CloudStream plugin ${source.name}: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Legacy APK installation path (for backward compatibility with non-CloudStream extensions).
+  Future<void> _installLegacyApk(
+    Source source,
+    Uri uri,
+    String fileName,
+  ) async {
+    final lowerName = fileName.toLowerCase();
+    if (!lowerName.endsWith('.apk')) {
+      return Future.error(
+        'The provided URL does not point to a supported extension file (.cs3/.zip/.apk).',
+      );
+    }
+
     File? apkFile;
     try {
-      // Extract package name from apkUrl (Requirement 4.2)
-      final packageName = source.apkUrl!.split('/').last.replaceAll('.apk', '');
-      debugPrint('Installing extension: ${source.name} ($packageName)');
+      // Extract package name from apkUrl
+      final packageName = fileName.isEmpty
+          ? uri.host.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_')
+          : fileName.replaceAll(RegExp(r'\.apk$'), '');
+      debugPrint(
+        'Installing legacy APK extension: ${source.name} ($packageName)',
+      );
 
-      // Download APK using http.get (Requirement 4.3, 12.1)
-      final response = await http.get(Uri.parse(source.apkUrl!));
+      // Download APK using http.get
+      final response = await http.get(uri);
 
-      // Validate HTTP response status is 200 (Requirement 4.4, 12.2)
       if (response.statusCode != 200) {
         throw Exception('Failed to download APK: HTTP ${response.statusCode}');
       }
@@ -681,98 +872,36 @@ class CloudStreamExtensions extends Extension {
         'Downloaded APK for ${source.name} (${response.bodyBytes.length} bytes)',
       );
 
-      // Save APK to temporary directory with package-based filename (Requirement 4.5, 12.3)
+      // Save APK to temporary directory
       final tempDir = await getTemporaryDirectory();
       apkFile = File(path.join(tempDir.path, '$packageName.apk'));
       await apkFile.writeAsBytes(response.bodyBytes);
 
       debugPrint('Saved APK to temporary file: ${apkFile.path}');
 
-      // Call InstallPlugin.installApk with file path and package ID (Requirement 4.6)
+      // Call InstallPlugin.installApk
       final result = await InstallPlugin.installApk(
         apkFile.path,
         appId: packageName,
       );
 
-      // Check installation result, throw exception if failed (Requirement 4.7)
       if (result['isSuccess'] != true) {
         throw Exception(
           'Installation failed: ${result['errorMessage'] ?? 'Unknown error'}',
         );
       }
 
-      // Remove extension from available list on success (Requirement 4.8)
-      final rx = getAvailableRx(source.itemType!);
-      rx.value = rx.value.where((s) => s.id != source.id).toList();
+      // Remove extension from available list on success
+      _removeFromAvailableLists(source);
 
-      // Also remove from unmodified list
-      switch (source.itemType!) {
-        case ItemType.anime:
-          availableAnimeExtensionsUnmodified.value =
-              availableAnimeExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.manga:
-          availableMangaExtensionsUnmodified.value =
-              availableMangaExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.novel:
-          availableNovelExtensionsUnmodified.value =
-              availableNovelExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.movie:
-          availableMovieExtensionsUnmodified.value =
-              availableMovieExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.tvShow:
-          availableTvShowExtensionsUnmodified.value =
-              availableTvShowExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.cartoon:
-          availableCartoonExtensionsUnmodified.value =
-              availableCartoonExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.documentary:
-          availableDocumentaryExtensionsUnmodified.value =
-              availableDocumentaryExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.livestream:
-          availableLivestreamExtensionsUnmodified.value =
-              availableLivestreamExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-        case ItemType.nsfw:
-          availableNsfwExtensionsUnmodified.value =
-              availableNsfwExtensionsUnmodified.value
-                  .where((s) => s.id != source.id)
-                  .toList();
-          break;
-      }
-
-      // Refresh installed extensions list for the content type (Requirement 4.9)
+      // Refresh installed extensions list
       await _getInstalled(source.itemType!);
 
-      debugPrint('Successfully installed extension: ${source.name}');
+      debugPrint('Successfully installed legacy APK extension: ${source.name}');
     } catch (e) {
-      // Log errors with context (Requirement 12.5)
-      debugPrint('Error installing source ${source.name}: $e');
+      debugPrint('Error installing legacy APK source ${source.name}: $e');
       rethrow;
     } finally {
-      // Delete temporary APK file in finally block (Requirement 4.10, 12.3)
       if (apkFile != null && await apkFile.exists()) {
         try {
           await apkFile.delete();
@@ -781,6 +910,72 @@ class CloudStreamExtensions extends Extension {
           debugPrint('Error deleting temporary APK file: $e');
         }
       }
+    }
+  }
+
+  /// Helper to remove a source from all available lists.
+  void _removeFromAvailableLists(Source source) {
+    if (source.itemType == null) return;
+
+    final rx = getAvailableRx(source.itemType!);
+    rx.value = rx.value.where((s) => s.id != source.id).toList();
+
+    // Also remove from unmodified list
+    switch (source.itemType!) {
+      case ItemType.anime:
+        availableAnimeExtensionsUnmodified.value =
+            availableAnimeExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.manga:
+        availableMangaExtensionsUnmodified.value =
+            availableMangaExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.novel:
+        availableNovelExtensionsUnmodified.value =
+            availableNovelExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.movie:
+        availableMovieExtensionsUnmodified.value =
+            availableMovieExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.tvShow:
+        availableTvShowExtensionsUnmodified.value =
+            availableTvShowExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.cartoon:
+        availableCartoonExtensionsUnmodified.value =
+            availableCartoonExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.documentary:
+        availableDocumentaryExtensionsUnmodified.value =
+            availableDocumentaryExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.livestream:
+        availableLivestreamExtensionsUnmodified.value =
+            availableLivestreamExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
+      case ItemType.nsfw:
+        availableNsfwExtensionsUnmodified.value =
+            availableNsfwExtensionsUnmodified.value
+                .where((s) => s.id != source.id)
+                .toList();
+        break;
     }
   }
 
@@ -794,65 +989,128 @@ class CloudStreamExtensions extends Extension {
     try {
       debugPrint('Uninstalling extension: ${source.name} (${source.id})');
 
-      // Check if package is installed using DeviceApps.isAppInstalled (Requirement 5.3)
-      final isInstalled = await _isPackageInstalled(source.id!);
+      // Check if this is a CloudStream plugin (installed via native plugin store)
+      final isCloudStreamPlugin = await _isCloudStreamPlugin(source.id!);
 
-      // If not installed, call removeFromInstalledList and return successfully (Requirement 5.4)
-      if (!isInstalled) {
-        removeFromInstalledList(source);
-        debugPrint('Package ${source.id} not installed, removed from list');
+      if (isCloudStreamPlugin) {
+        // Use the new native plugin uninstaller
+        await _uninstallCloudStreamPlugin(source);
         return;
       }
 
-      // If installed, call DeviceApps.uninstallApp to initiate uninstallation (Requirement 5.5)
-      final uninstallInitiated = await FlutterDeviceApps.uninstallApp(
-        source.id!,
-      );
-
-      if (!uninstallInitiated) {
-        throw Exception('Failed to initiate uninstallation for ${source.id}');
-      }
-
-      debugPrint(
-        'Uninstallation initiated for ${source.id}, waiting for completion...',
-      );
-
-      // Poll for up to 10 seconds (500ms intervals) to verify package removal (Requirement 5.6)
-      bool packageRemoved = false;
-      for (int i = 0; i < 20; i++) {
-        // 20 iterations * 500ms = 10 seconds
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        final stillInstalled = await _isPackageInstalled(source.id!);
-        if (!stillInstalled) {
-          packageRemoved = true;
-          break;
-        }
-      }
-
-      // Throw exception if uninstallation times out (Requirement 5.9)
-      if (!packageRemoved) {
-        throw Exception('Uninstallation timed out or was cancelled by user');
-      }
-
-      // Call removeFromInstalledList on successful removal (Requirement 5.7)
-      removeFromInstalledList(source);
-
-      // Add extension back to available list if it exists in availableUnmodified (Requirement 5.8)
-      final unmodifiedList = getAvailableUnmodified(source.itemType!);
-      final existsInAvailable = unmodifiedList.any((s) => s.id == source.id);
-
-      if (existsInAvailable) {
-        final sourceToAdd = unmodifiedList.firstWhere((s) => s.id == source.id);
-        final rx = getAvailableRx(source.itemType!);
-        rx.value = [...rx.value, sourceToAdd];
-      }
-
-      debugPrint('Successfully uninstalled extension: ${source.name}');
+      // Legacy APK uninstallation path (for backward compatibility)
+      await _uninstallLegacyApk(source);
     } catch (e) {
-      // Log errors with context (Requirement 12.5)
       debugPrint('Error uninstalling source ${source.name}: $e');
       rethrow;
+    }
+  }
+
+  /// Check if a source is a CloudStream plugin (installed via native plugin store).
+  Future<bool> _isCloudStreamPlugin(String sourceId) async {
+    try {
+      final plugins = await listInstalledCloudStreamPlugins();
+      return plugins.any((p) => p['internalName'] == sourceId);
+    } catch (e) {
+      debugPrint('Error checking if $sourceId is CloudStream plugin: $e');
+      return false;
+    }
+  }
+
+  /// Uninstall a CloudStream plugin through the native plugin store.
+  Future<void> _uninstallCloudStreamPlugin(Source source) async {
+    try {
+      isLoading.value = true;
+      lastError.value = null;
+
+      debugPrint(
+        'Uninstalling CloudStream plugin: ${source.name} (${source.id})',
+      );
+
+      final success = await uninstallCloudStreamPlugin(source.id!);
+
+      if (!success) {
+        throw Exception(lastError.value ?? 'Uninstallation failed');
+      }
+
+      // Remove from installed list
+      removeFromInstalledList(source);
+
+      // Add extension back to available list if it exists in availableUnmodified
+      _addBackToAvailableList(source);
+
+      // Refresh plugin status
+      await refreshPluginStatus();
+
+      debugPrint('Successfully uninstalled CloudStream plugin: ${source.name}');
+    } catch (e) {
+      lastError.value = 'Failed to uninstall plugin: $e';
+      debugPrint('Error uninstalling CloudStream plugin ${source.name}: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Legacy APK uninstallation path (for backward compatibility).
+  Future<void> _uninstallLegacyApk(Source source) async {
+    // Check if package is installed using DeviceApps.isAppInstalled
+    final isInstalled = await _isPackageInstalled(source.id!);
+
+    // If not installed, call removeFromInstalledList and return successfully
+    if (!isInstalled) {
+      removeFromInstalledList(source);
+      debugPrint('Package ${source.id} not installed, removed from list');
+      return;
+    }
+
+    // If installed, call DeviceApps.uninstallApp to initiate uninstallation
+    final uninstallInitiated = await FlutterDeviceApps.uninstallApp(source.id!);
+
+    if (!uninstallInitiated) {
+      throw Exception('Failed to initiate uninstallation for ${source.id}');
+    }
+
+    debugPrint(
+      'Uninstallation initiated for ${source.id}, waiting for completion...',
+    );
+
+    // Poll for up to 10 seconds (500ms intervals) to verify package removal
+    bool packageRemoved = false;
+    for (int i = 0; i < 20; i++) {
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final stillInstalled = await _isPackageInstalled(source.id!);
+      if (!stillInstalled) {
+        packageRemoved = true;
+        break;
+      }
+    }
+
+    if (!packageRemoved) {
+      throw Exception('Uninstallation timed out or was cancelled by user');
+    }
+
+    // Remove from installed list
+    removeFromInstalledList(source);
+
+    // Add extension back to available list
+    _addBackToAvailableList(source);
+
+    debugPrint('Successfully uninstalled legacy APK extension: ${source.name}');
+  }
+
+  /// Helper to add a source back to available lists after uninstallation.
+  void _addBackToAvailableList(Source source) {
+    if (source.itemType == null) return;
+
+    final unmodifiedList = getAvailableUnmodified(source.itemType!);
+    final existsInAvailable = unmodifiedList.any((s) => s.id == source.id);
+
+    if (existsInAvailable) {
+      final sourceToAdd = unmodifiedList.firstWhere((s) => s.id == source.id);
+      final rx = getAvailableRx(source.itemType!);
+      rx.value = [...rx.value, sourceToAdd];
     }
   }
 
@@ -960,5 +1218,356 @@ class CloudStreamExtensions extends Extension {
   Future<bool> _isPackageInstalled(String packageName) async {
     final appInfo = await FlutterDeviceApps.getApp(packageName);
     return appInfo != null;
+  }
+
+  // ============================================================
+  // New Platform Methods for Plugin Management
+  // ============================================================
+
+  /// Initialize or reinitialize all plugins on the native side.
+  /// Returns a map with success status, loaded count, and extractor count.
+  Future<Map<String, dynamic>> initializePlugins() async {
+    try {
+      isLoading.value = true;
+      lastError.value = null;
+
+      final result = await platform.invokeMethod('initializePlugins');
+      final resultMap = Map<String, dynamic>.from(result as Map);
+
+      // Update plugin status
+      await refreshPluginStatus();
+
+      debugPrint(
+        'Plugins initialized: ${resultMap['loadedCount']} plugins, ${resultMap['extractorCount']} extractors',
+      );
+
+      return resultMap;
+    } catch (e) {
+      lastError.value = 'Failed to initialize plugins: $e';
+      debugPrint('Error initializing plugins: $e');
+      return {'success': false, 'error': e.toString()};
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Get the current plugin status from the native layer.
+  Future<Map<String, dynamic>> refreshPluginStatus() async {
+    try {
+      final result = await platform.invokeMethod('getPluginStatus');
+      final resultMap = Map<String, dynamic>.from(result as Map);
+      pluginStatus.value = resultMap;
+      return resultMap;
+    } catch (e) {
+      debugPrint('Error getting plugin status: $e');
+      return {};
+    }
+  }
+
+  /// List all installed CloudStream plugins from the native store.
+  Future<List<Map<String, dynamic>>> listInstalledCloudStreamPlugins() async {
+    try {
+      final result = await platform.invokeMethod(
+        'listInstalledCloudStreamPlugins',
+      );
+      return (result as List).map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      debugPrint('Error listing installed plugins: $e');
+      return [];
+    }
+  }
+
+  /// Install a CloudStream plugin from a .cs3/.zip file.
+  ///
+  /// This method:
+  /// 1. Downloads the plugin bundle
+  /// 2. Extracts it to the plugin directory
+  /// 3. Loads the plugin into the registry
+  /// 4. Returns the installed plugin metadata
+  Future<Map<String, dynamic>?> installCloudStreamPlugin({
+    required String internalName,
+    required String downloadUrl,
+    String? repoUrl,
+    String? version,
+    List<String>? tvTypes,
+    String? lang,
+    bool isNsfw = false,
+    List<int>? itemTypes,
+  }) async {
+    try {
+      isLoading.value = true;
+      lastError.value = null;
+
+      final metadata = {
+        'internalName': internalName,
+        'downloadUrl': downloadUrl,
+        'repoUrl': repoUrl,
+        'version': version,
+        'tvTypes': tvTypes ?? [],
+        'lang': lang,
+        'isNsfw': isNsfw,
+        'itemTypes': itemTypes ?? [],
+      };
+
+      final result = await platform.invokeMethod('installCloudStreamPlugin', {
+        'metadata': metadata,
+        'repoKey': repoUrl,
+      });
+
+      final resultMap = Map<String, dynamic>.from(result as Map);
+
+      // Refresh installed lists
+      await _refreshAllInstalledLists();
+
+      debugPrint(
+        'Plugin installed: $internalName (loaded: ${resultMap['loaded']})',
+      );
+      return resultMap;
+    } catch (e) {
+      lastError.value = 'Failed to install plugin: $e';
+      debugPrint('Error installing plugin $internalName: $e');
+      return null;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Uninstall a CloudStream plugin.
+  Future<bool> uninstallCloudStreamPlugin(String internalName) async {
+    try {
+      isLoading.value = true;
+      lastError.value = null;
+
+      final result = await platform.invokeMethod('uninstallCloudStreamPlugin', {
+        'internalName': internalName,
+      });
+
+      // Refresh installed lists
+      await _refreshAllInstalledLists();
+
+      debugPrint('Plugin uninstalled: $internalName');
+      return result as bool? ?? false;
+    } catch (e) {
+      lastError.value = 'Failed to uninstall plugin: $e';
+      debugPrint('Error uninstalling plugin $internalName: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Refresh all installed extension lists.
+  Future<void> _refreshAllInstalledLists() async {
+    await Future.wait([
+      getInstalledAnimeExtensions(),
+      getInstalledMangaExtensions(),
+      getInstalledNovelExtensions(),
+      getInstalledMovieExtensions(),
+      getInstalledTvShowExtensions(),
+      getInstalledCartoonExtensions(),
+      getInstalledDocumentaryExtensions(),
+      getInstalledLivestreamExtensions(),
+      getInstalledNsfwExtensions(),
+    ]);
+  }
+
+  // ============================================================
+  // Extractor Service Methods
+  // ============================================================
+
+  /// Extract video links from a URL using CloudStream extractors.
+  ///
+  /// This can be called by other bridges (Aniyomi/Lnreader) to use
+  /// CloudStream's extractor implementations.
+  Future<ExtractorResult> extract(String url, {String? referer}) async {
+    try {
+      final result = await platform.invokeMethod('cloudstream:extract', {
+        'url': url,
+        'referer': referer,
+      });
+
+      return ExtractorResult.fromJson(Map<String, dynamic>.from(result as Map));
+    } catch (e) {
+      debugPrint('Error extracting from $url: $e');
+      return ExtractorResult(
+        success: false,
+        links: [],
+        subtitles: [],
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// Extract video links using a specific extractor by name.
+  Future<ExtractorResult> extractWithExtractor(
+    String extractorName,
+    String url, {
+    String? referer,
+  }) async {
+    try {
+      final result = await platform.invokeMethod(
+        'cloudstream:extractWithExtractor',
+        {'extractorName': extractorName, 'url': url, 'referer': referer},
+      );
+
+      return ExtractorResult.fromJson(Map<String, dynamic>.from(result as Map));
+    } catch (e) {
+      debugPrint('Error extracting with $extractorName: $e');
+      return ExtractorResult(
+        success: false,
+        links: [],
+        subtitles: [],
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// List all available extractors.
+  Future<List<ExtractorInfo>> listExtractors() async {
+    try {
+      final result = await platform.invokeMethod('cloudstream:listExtractors');
+      return (result as List)
+          .map((e) => ExtractorInfo.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    } catch (e) {
+      debugPrint('Error listing extractors: $e');
+      return [];
+    }
+  }
+
+  /// Get loaded plugins from the native registry.
+  Future<List<Map<String, dynamic>>> getLoadedPlugins() async {
+    try {
+      final result = await platform.invokeMethod(
+        'cloudstream:getLoadedPlugins',
+      );
+      return (result as List).map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      debugPrint('Error getting loaded plugins: $e');
+      return [];
+    }
+  }
+}
+
+// ============================================================
+// Extractor Result Models
+// ============================================================
+
+/// Result of an extraction operation.
+class ExtractorResult {
+  final bool success;
+  final List<ExtractedLink> links;
+  final List<ExtractedSubtitle> subtitles;
+  final String? error;
+
+  ExtractorResult({
+    required this.success,
+    required this.links,
+    required this.subtitles,
+    this.error,
+  });
+
+  factory ExtractorResult.fromJson(Map<String, dynamic> json) {
+    return ExtractorResult(
+      success: json['success'] as bool? ?? false,
+      links:
+          (json['links'] as List?)
+              ?.map((e) => ExtractedLink.fromJson(Map<String, dynamic>.from(e)))
+              .toList() ??
+          [],
+      subtitles:
+          (json['subtitles'] as List?)
+              ?.map(
+                (e) => ExtractedSubtitle.fromJson(Map<String, dynamic>.from(e)),
+              )
+              .toList() ??
+          [],
+      error: json['error'] as String?,
+    );
+  }
+}
+
+/// Extracted video link information.
+class ExtractedLink {
+  final String source;
+  final String name;
+  final String url;
+  final String referer;
+  final int quality;
+  final Map<String, String> headers;
+  final String? extractorData;
+  final String type;
+  final bool isM3u8;
+  final bool isDash;
+
+  ExtractedLink({
+    required this.source,
+    required this.name,
+    required this.url,
+    required this.referer,
+    required this.quality,
+    this.headers = const {},
+    this.extractorData,
+    required this.type,
+    required this.isM3u8,
+    required this.isDash,
+  });
+
+  factory ExtractedLink.fromJson(Map<String, dynamic> json) {
+    return ExtractedLink(
+      source: json['source'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+      referer: json['referer'] as String? ?? '',
+      quality: json['quality'] as int? ?? 0,
+      headers:
+          (json['headers'] as Map?)?.map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          ) ??
+          {},
+      extractorData: json['extractorData'] as String?,
+      type: json['type'] as String? ?? 'VIDEO',
+      isM3u8: json['isM3u8'] as bool? ?? false,
+      isDash: json['isDash'] as bool? ?? false,
+    );
+  }
+}
+
+/// Extracted subtitle information.
+class ExtractedSubtitle {
+  final String lang;
+  final String url;
+
+  ExtractedSubtitle({required this.lang, required this.url});
+
+  factory ExtractedSubtitle.fromJson(Map<String, dynamic> json) {
+    return ExtractedSubtitle(
+      lang: json['lang'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+    );
+  }
+}
+
+/// Information about an available extractor.
+class ExtractorInfo {
+  final String name;
+  final String mainUrl;
+  final bool requiresReferer;
+  final String? sourcePlugin;
+
+  ExtractorInfo({
+    required this.name,
+    required this.mainUrl,
+    required this.requiresReferer,
+    this.sourcePlugin,
+  });
+
+  factory ExtractorInfo.fromJson(Map<String, dynamic> json) {
+    return ExtractorInfo(
+      name: json['name'] as String? ?? '',
+      mainUrl: json['mainUrl'] as String? ?? '',
+      requiresReferer: json['requiresReferer'] as bool? ?? false,
+      sourcePlugin: json['sourcePlugin'] as String?,
+    );
   }
 }

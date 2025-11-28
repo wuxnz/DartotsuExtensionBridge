@@ -3,6 +3,7 @@
 A Flutter plugin that provides a unified interface for managing multiple extension systems (Aniyomi, Mangayomi, and CloudStream) for streaming and reading content across various media types.
 
 ## Overview
+
 Archi
 The Dartotsu Extension Bridge enables Flutter applications to discover, install, update, and manage extensions from four different extension ecosystems:
 
@@ -154,16 +155,18 @@ Plugins are distributed via `plugins.min.json` files:
 
 ### CloudStream Extension Bridge
 
-The CloudStream Extension Bridge provides comprehensive support for CloudStream video streaming extensions.
+The CloudStream Extension Bridge provides comprehensive support for CloudStream video streaming extensions with a new DexClassLoader-based plugin system.
 
 #### Key Features
 
 - Support for all 9 content types
-- APK-based extension distribution
+- **DexClassLoader-based plugin loading** (`.cs3`/`.zip` bundles)
+- APK-based extension distribution (legacy support)
 - Automatic update detection
 - Repository persistence via Isar database
 - Platform channel integration with native Android code
 - Concurrent extension loading for improved performance
+- **Shared Extractor Service** for cross-bridge video extraction
 - Comprehensive error handling and logging
 
 #### Architecture
@@ -179,20 +182,40 @@ The CloudStream Extension Bridge provides comprehensive support for CloudStream 
 └───────┬───────┴────────┬─────────┴──────┬───────┘
         ↓                ↓                ↓
                Platform Channel Layer
-        ↓                ↓                ↓
-           Native Android Implementation
+                         ↓
+┌────────────────────────────────────────────────────┐
+│              CloudStreamBridge                      │
+│  ┌─────────────────┬─────────────────────────────┐ │
+│  │ PluginRegistry  │     ExtractorService        │ │
+│  │  (MainAPI map)  │  (Video link extraction)    │ │
+│  └────────┬────────┴──────────────┬──────────────┘ │
+│           ↓                       ↓                │
+│  ┌─────────────────┐    ┌─────────────────────┐   │
+│  │  PluginLoader   │    │   ApiRouter         │   │
+│  │ (DexClassLoader)│    │ (Method dispatch)   │   │
+│  └─────────────────┘    └─────────────────────┘   │
+└────────────────────────────────────────────────────┘
 ```
 
 #### Implementation Details
 
 **Dart Layer** (`lib/CloudStream/`):
 
-- `CloudStreamExtensions.dart`: Main extension management class
-- `CloudStreamSourceMethods.dart`: Content source operations
+- `CloudStreamExtensions.dart`: Main extension management class with plugin lifecycle methods
+- `CloudStreamSourceMethods.dart`: Content source operations using `cloudstream:*` prefixed methods
 
-**Native Layer** (`android/src/main/kotlin/`):
+**Shared Extractor Service** (`lib/Extensions/`):
 
-- `CloudStreamBridge.kt`: Platform channel handler for querying installed CloudStream APKs
+- `ExtractorService.dart`: Cross-bridge video extractor service that other bridges can use
+
+**Native Layer** (`android/src/main/kotlin/.../cloudstream/`):
+
+- `CloudStreamBridge.kt`: Main MethodChannel handler integrating all components
+- `CloudStreamPluginLoader.kt`: DexClassLoader-based plugin loading from `.cs3`/`.zip` bundles
+- `CloudStreamPluginRegistry.kt`: MainAPI instance registry keyed by sourceId
+- `CloudStreamApiRouter.kt`: Method routing to loaded plugins (`cloudstream:*` methods)
+- `CloudStreamExtractorService.kt`: Video extractor invocations
+- `CloudStreamPluginStore.kt`: Persistent storage for plugin metadata
 
 **Data Models** (`lib/Models/`):
 
@@ -202,6 +225,50 @@ The CloudStream Extension Bridge provides comprehensive support for CloudStream 
 **Settings** (`lib/Settings/`):
 
 - `Settings.dart`: Isar database schema for repository persistence
+
+#### Plugin Loading Pipeline
+
+1. **Download**: Plugin bundle (`.cs3`/`.zip`) downloaded from repository
+2. **Extract**: Bundle extracted to plugin directory
+3. **Parse Manifest**: `manifest.json` read for plugin class name and extractors
+4. **Load DEX**: `DexClassLoader` loads `classes.dex` from plugin
+5. **Instantiate MainAPI**: Plugin class instantiated and registered
+6. **Register Extractors**: Plugin extractors added to global extractor list
+
+#### Extractor Service
+
+The CloudStream Extractor Service provides video link extraction that can be used by any bridge:
+
+```dart
+import 'package:dartotsu_extension_bridge/Extensions/ExtractorService.dart';
+
+// Extract video links from a URL
+final result = await ExtractorService().extract(
+  'https://example.com/video/123',
+  referer: 'https://example.com',
+);
+
+if (result.success) {
+  for (final link in result.links) {
+    print('Found: ${link.url} (${link.qualityString})');
+  }
+}
+
+// Use a specific extractor
+final result2 = await ExtractorService().extractWithExtractor(
+  'Mp4Upload',
+  'https://mp4upload.com/video/abc',
+);
+
+// List available extractors
+final extractors = await ExtractorService().listExtractors();
+```
+
+#### Storage Paths
+
+- **Plugin bundles**: `{app_data}/cloudstream_plugins/{repo}/{plugin}/`
+- **DEX cache**: `{code_cache}/cloudstream_dex/{plugin}/`
+- **Metadata**: `{app_data}/cloudstream_plugins/plugins.json`
 
 ## Installation
 
@@ -520,7 +587,32 @@ Isar database for storing:
 
 ## Recent Changes
 
-### LnReader Extension Bridge Implementation (Latest)
+### CloudStream DexClassLoader Plugin System (Latest)
+
+- **New Plugin Installation Flow**: CloudStream plugins (`.cs3`/`.zip` bundles) are now installed through a native plugin store using DexClassLoader, eliminating the need for APK installation
+- **Plugin Registry**: Loaded plugins are managed in a native registry keyed by sourceId
+- **Shared Extractor Service**: CloudStream's 200+ video extractors are now available to other bridges (Aniyomi/LnReader) via `ExtractorService`
+- **Status Monitoring**: `pluginStatus`, `isLoading`, and `lastError` observables for UI feedback
+- **Automatic Initialization**: Plugins are automatically loaded on startup via `initializePlugins()`
+
+### Cross-Bridge Extractor Usage
+
+Other bridges can now use CloudStream extractors:
+
+```dart
+// From Aniyomi source methods
+final videos = await sourceMethods.extractWithCloudStream(videoUrl);
+
+// Or directly via ExtractorService
+final result = await ExtractorService().extract(url, referer: referer);
+if (result.success) {
+  for (final link in result.links) {
+    print('Found: ${link.url} (${link.qualityString})');
+  }
+}
+```
+
+### LnReader Extension Bridge Implementation
 
 - Added complete LnReader extension support with JavaScript-based plugins
 - Implemented QuickJS runtime with 4MB stack for secure plugin execution

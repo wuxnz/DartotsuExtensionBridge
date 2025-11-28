@@ -1,1 +1,31 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+def cloudstreamCatalog = files('../deps/cloudstream/gradle/libs.versions.toml')
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://storage.googleapis.com/download.flutter.io' }
+    }
+
+    versionCatalogs {
+        create('libs') {
+            from(cloudstreamCatalog)
+        }
+    }
+}
+
 rootProject.name = 'dartotsu_extension_bridge'
+
+include ':cloudstream-library'
+project(':cloudstream-library').projectDir = new File(rootDir, '../deps/cloudstream/library')

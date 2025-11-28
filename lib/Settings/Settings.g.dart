@@ -5382,3 +5382,3034 @@ extension BridgeSettingsQueryProperty
     });
   }
 }
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetCloudStreamPluginDataCollection on Isar {
+  IsarCollection<CloudStreamPluginData> get cloudStreamPluginDatas =>
+      this.collection();
+}
+
+const CloudStreamPluginDataSchema = CollectionSchema(
+  name: r'CloudStreamPluginData',
+  id: -3579244607679911845,
+  properties: {
+    r'downloadUrl': PropertySchema(
+      id: 0,
+      name: r'downloadUrl',
+      type: IsarType.string,
+    ),
+    r'internalName': PropertySchema(
+      id: 1,
+      name: r'internalName',
+      type: IsarType.string,
+    ),
+    r'isNsfw': PropertySchema(id: 2, name: r'isNsfw', type: IsarType.bool),
+    r'itemTypes': PropertySchema(
+      id: 3,
+      name: r'itemTypes',
+      type: IsarType.longList,
+    ),
+    r'lang': PropertySchema(id: 4, name: r'lang', type: IsarType.string),
+    r'lastUpdated': PropertySchema(
+      id: 5,
+      name: r'lastUpdated',
+      type: IsarType.dateTime,
+    ),
+    r'localPath': PropertySchema(
+      id: 6,
+      name: r'localPath',
+      type: IsarType.string,
+    ),
+    r'pluginListUrl': PropertySchema(
+      id: 7,
+      name: r'pluginListUrl',
+      type: IsarType.string,
+    ),
+    r'repoUrl': PropertySchema(id: 8, name: r'repoUrl', type: IsarType.string),
+    r'status': PropertySchema(
+      id: 9,
+      name: r'status',
+      type: IsarType.string,
+      enumMap: _CloudStreamPluginDatastatusEnumValueMap,
+    ),
+    r'tvTypes': PropertySchema(
+      id: 10,
+      name: r'tvTypes',
+      type: IsarType.stringList,
+    ),
+    r'version': PropertySchema(id: 11, name: r'version', type: IsarType.string),
+  },
+
+  estimateSize: _cloudStreamPluginDataEstimateSize,
+  serialize: _cloudStreamPluginDataSerialize,
+  deserialize: _cloudStreamPluginDataDeserialize,
+  deserializeProp: _cloudStreamPluginDataDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {},
+  embeddedSchemas: {},
+
+  getId: _cloudStreamPluginDataGetId,
+  getLinks: _cloudStreamPluginDataGetLinks,
+  attach: _cloudStreamPluginDataAttach,
+  version: '3.3.0',
+);
+
+int _cloudStreamPluginDataEstimateSize(
+  CloudStreamPluginData object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.downloadUrl;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.internalName.length * 3;
+  bytesCount += 3 + object.itemTypes.length * 8;
+  {
+    final value = object.lang;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.localPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.pluginListUrl;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.repoUrl;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.status.name.length * 3;
+  bytesCount += 3 + object.tvTypes.length * 3;
+  {
+    for (var i = 0; i < object.tvTypes.length; i++) {
+      final value = object.tvTypes[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  {
+    final value = object.version;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _cloudStreamPluginDataSerialize(
+  CloudStreamPluginData object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.downloadUrl);
+  writer.writeString(offsets[1], object.internalName);
+  writer.writeBool(offsets[2], object.isNsfw);
+  writer.writeLongList(offsets[3], object.itemTypes);
+  writer.writeString(offsets[4], object.lang);
+  writer.writeDateTime(offsets[5], object.lastUpdated);
+  writer.writeString(offsets[6], object.localPath);
+  writer.writeString(offsets[7], object.pluginListUrl);
+  writer.writeString(offsets[8], object.repoUrl);
+  writer.writeString(offsets[9], object.status.name);
+  writer.writeStringList(offsets[10], object.tvTypes);
+  writer.writeString(offsets[11], object.version);
+}
+
+CloudStreamPluginData _cloudStreamPluginDataDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = CloudStreamPluginData(
+    downloadUrl: reader.readStringOrNull(offsets[0]),
+    internalName: reader.readString(offsets[1]),
+    isNsfw: reader.readBoolOrNull(offsets[2]) ?? false,
+    itemTypes: reader.readLongList(offsets[3]) ?? const [],
+    lang: reader.readStringOrNull(offsets[4]),
+    lastUpdated: reader.readDateTimeOrNull(offsets[5]),
+    localPath: reader.readStringOrNull(offsets[6]),
+    pluginListUrl: reader.readStringOrNull(offsets[7]),
+    repoUrl: reader.readStringOrNull(offsets[8]),
+    status:
+        _CloudStreamPluginDatastatusValueEnumMap[reader.readStringOrNull(
+          offsets[9],
+        )] ??
+        CloudStreamPluginStatus.installed,
+    tvTypes: reader.readStringList(offsets[10]) ?? const [],
+    version: reader.readStringOrNull(offsets[11]),
+  );
+  object.id = id;
+  return object;
+}
+
+P _cloudStreamPluginDataDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 3:
+      return (reader.readLongList(offset) ?? const []) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (_CloudStreamPluginDatastatusValueEnumMap[reader.readStringOrNull(
+                offset,
+              )] ??
+              CloudStreamPluginStatus.installed)
+          as P;
+    case 10:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+const _CloudStreamPluginDatastatusEnumValueMap = {
+  r'installed': r'installed',
+  r'disabled': r'disabled',
+};
+const _CloudStreamPluginDatastatusValueEnumMap = {
+  r'installed': CloudStreamPluginStatus.installed,
+  r'disabled': CloudStreamPluginStatus.disabled,
+};
+
+Id _cloudStreamPluginDataGetId(CloudStreamPluginData object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _cloudStreamPluginDataGetLinks(
+  CloudStreamPluginData object,
+) {
+  return [];
+}
+
+void _cloudStreamPluginDataAttach(
+  IsarCollection<dynamic> col,
+  Id id,
+  CloudStreamPluginData object,
+) {
+  object.id = id;
+}
+
+extension CloudStreamPluginDataQueryWhereSort
+    on QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QWhere> {
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhere>
+  anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension CloudStreamPluginDataQueryWhere
+    on
+        QueryBuilder<
+          CloudStreamPluginData,
+          CloudStreamPluginData,
+          QWhereClause
+        > {
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhereClause>
+  idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhereClause>
+  idNotEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhereClause>
+  idGreaterThan(Id id, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhereClause>
+  idLessThan(Id id, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterWhereClause>
+  idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+}
+
+extension CloudStreamPluginDataQueryFilter
+    on
+        QueryBuilder<
+          CloudStreamPluginData,
+          CloudStreamPluginData,
+          QFilterCondition
+        > {
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'downloadUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'downloadUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'downloadUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'downloadUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'downloadUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'downloadUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  downloadUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'downloadUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  idEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  idGreaterThan(Id value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  idLessThan(Id value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'internalName',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'internalName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'internalName',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'internalName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  internalNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'internalName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  isNsfwEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isNsfw', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesElementEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'itemTypes', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesElementGreaterThan(int value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'itemTypes',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesElementLessThan(int value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'itemTypes',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'itemTypes',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'itemTypes', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'itemTypes', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'itemTypes', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'itemTypes', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'itemTypes', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  itemTypesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'itemTypes',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lang'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lang'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lang',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'lang',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'lang',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lang', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  langIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'lang', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lastUpdated'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lastUpdated'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastUpdated', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedLessThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastUpdated',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  lastUpdatedBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastUpdated',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'localPath'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'localPath'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'localPath',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'localPath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'localPath',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'localPath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  localPathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'localPath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'pluginListUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'pluginListUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'pluginListUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'pluginListUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'pluginListUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'pluginListUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  pluginListUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'pluginListUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'repoUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'repoUrl'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'repoUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'repoUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'repoUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'repoUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  repoUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'repoUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusEqualTo(CloudStreamPluginStatus value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusGreaterThan(
+    CloudStreamPluginStatus value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusLessThan(
+    CloudStreamPluginStatus value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusBetween(
+    CloudStreamPluginStatus lower,
+    CloudStreamPluginStatus upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'status',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'status',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'status',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'status', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  statusIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'status', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'tvTypes',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'tvTypes',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'tvTypes',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'tvTypes', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'tvTypes', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'tvTypes', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'tvTypes', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'tvTypes', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'tvTypes', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'tvTypes', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  tvTypesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tvTypes',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'version'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'version'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'version',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'version',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'version',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'version', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    CloudStreamPluginData,
+    CloudStreamPluginData,
+    QAfterFilterCondition
+  >
+  versionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'version', value: ''),
+      );
+    });
+  }
+}
+
+extension CloudStreamPluginDataQueryObject
+    on
+        QueryBuilder<
+          CloudStreamPluginData,
+          CloudStreamPluginData,
+          QFilterCondition
+        > {}
+
+extension CloudStreamPluginDataQueryLinks
+    on
+        QueryBuilder<
+          CloudStreamPluginData,
+          CloudStreamPluginData,
+          QFilterCondition
+        > {}
+
+extension CloudStreamPluginDataQuerySortBy
+    on QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QSortBy> {
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByDownloadUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'downloadUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByDownloadUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'downloadUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByInternalName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByInternalNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLang() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lang', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLangDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lang', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLastUpdated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLastUpdatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLocalPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'localPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByLocalPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'localPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByPluginListUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginListUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByPluginListUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginListUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByRepoUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repoUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByRepoUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repoUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  sortByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.desc);
+    });
+  }
+}
+
+extension CloudStreamPluginDataQuerySortThenBy
+    on QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QSortThenBy> {
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByDownloadUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'downloadUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByDownloadUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'downloadUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByInternalName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByInternalNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLang() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lang', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLangDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lang', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLastUpdated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLastUpdatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastUpdated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLocalPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'localPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByLocalPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'localPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByPluginListUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginListUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByPluginListUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pluginListUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByRepoUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repoUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByRepoUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repoUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'status', Sort.desc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QAfterSortBy>
+  thenByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'version', Sort.desc);
+    });
+  }
+}
+
+extension CloudStreamPluginDataQueryWhereDistinct
+    on QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct> {
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByDownloadUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'downloadUrl', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByInternalName({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'internalName', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isNsfw');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByItemTypes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'itemTypes');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByLang({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lang', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByLastUpdated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastUpdated');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByLocalPath({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'localPath', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByPluginListUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'pluginListUrl',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByRepoUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'repoUrl', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByStatus({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'status', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByTvTypes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tvTypes');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginData, QDistinct>
+  distinctByVersion({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'version', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension CloudStreamPluginDataQueryProperty
+    on
+        QueryBuilder<
+          CloudStreamPluginData,
+          CloudStreamPluginData,
+          QQueryProperty
+        > {
+  QueryBuilder<CloudStreamPluginData, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  downloadUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'downloadUrl');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String, QQueryOperations>
+  internalNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'internalName');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, bool, QQueryOperations> isNsfwProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isNsfw');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, List<int>, QQueryOperations>
+  itemTypesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'itemTypes');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  langProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lang');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, DateTime?, QQueryOperations>
+  lastUpdatedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastUpdated');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  localPathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'localPath');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  pluginListUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pluginListUrl');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  repoUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'repoUrl');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, CloudStreamPluginStatus, QQueryOperations>
+  statusProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, List<String>, QQueryOperations>
+  tvTypesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tvTypes');
+    });
+  }
+
+  QueryBuilder<CloudStreamPluginData, String?, QQueryOperations>
+  versionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'version');
+    });
+  }
+}
