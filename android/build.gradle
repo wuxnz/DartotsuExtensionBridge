@@ -88,5 +88,24 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    implementation project(':cloudstream-library')
+    // CloudStream library - include as project if available, otherwise use pre-built AAR
+    def cloudstreamProject = findProject(':cloudstream-library')
+    if (cloudstreamProject != null) {
+        implementation project(':cloudstream-library')
+    } else {
+        // When used as a Flutter plugin dependency, include the pre-built AAR
+        def aarFile = new File(projectDir, 'libs/cloudstream-library.aar')
+        if (aarFile.exists()) {
+            implementation files('libs/cloudstream-library.aar')
+        } else {
+            // Fallback: try to find AAR in the deps folder relative to this module
+            def pluginDir = projectDir.parentFile
+            def depsAar = new File(pluginDir, 'deps/cloudstream/library/build/outputs/aar/library-release.aar')
+            if (depsAar.exists()) {
+                implementation files(depsAar.absolutePath)
+            } else {
+                throw new GradleException("CloudStream library not found. Please build the cloudstream-library first or include the AAR in android/libs/")
+            }
+        }
+    }
 }
