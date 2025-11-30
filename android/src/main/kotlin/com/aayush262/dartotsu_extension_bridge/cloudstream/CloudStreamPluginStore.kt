@@ -128,6 +128,7 @@ class CloudStreamPluginStore(private val context: Context) {
 @Serializable
 data class CloudStreamPluginMetadata(
     val internalName: String,
+    val displayName: String? = null,
     val repoUrl: String? = null,
     val pluginListUrl: String? = null,
     val downloadUrl: String? = null,
@@ -139,6 +140,7 @@ data class CloudStreamPluginMetadata(
     val localPath: String? = null,
     val lastUpdated: Long? = null,
     val status: CloudStreamPluginStatus = CloudStreamPluginStatus.INSTALLED,
+    val iconUrl: String? = null,
 )
 
 @Serializable
@@ -157,10 +159,10 @@ fun CloudStreamPluginMetadata.matchesItemType(itemType: Int): Boolean {
 fun CloudStreamPluginMetadata.toInstalledSourcePayload(itemType: Int): Map<String, Any?> {
     return mapOf(
         "id" to internalName,
-        "name" to internalName,
+        "name" to (displayName ?: internalName),
         "lang" to lang,
         "isNsfw" to isNsfw,
-        "iconUrl" to null,
+        "iconUrl" to iconUrl,
         "version" to version,
         "itemType" to itemType,
         "repo" to repoUrl,
@@ -174,6 +176,7 @@ fun CloudStreamPluginMetadata.toInstalledSourcePayload(itemType: Int): Map<Strin
 fun CloudStreamPluginMetadata.toMetadataPayload(): Map<String, Any?> {
     return mapOf(
         "internalName" to internalName,
+        "name" to displayName,
         "repoUrl" to repoUrl,
         "pluginListUrl" to pluginListUrl,
         "downloadUrl" to downloadUrl,
@@ -185,6 +188,7 @@ fun CloudStreamPluginMetadata.toMetadataPayload(): Map<String, Any?> {
         "localPath" to localPath,
         "lastUpdated" to lastUpdated,
         "status" to status.name.lowercase(Locale.ROOT),
+        "iconUrl" to iconUrl,
     )
 }
 
@@ -192,6 +196,7 @@ fun Map<String, Any?>.toCloudStreamPluginMetadata(): CloudStreamPluginMetadata {
     return CloudStreamPluginMetadata(
         internalName = this["internalName"]?.toString()
             ?: throw IllegalArgumentException("internalName is required"),
+        displayName = this["name"]?.toString(),
         repoUrl = this["repoUrl"]?.toString(),
         pluginListUrl = this["pluginListUrl"]?.toString(),
         downloadUrl = this["downloadUrl"]?.toString(),
@@ -213,6 +218,7 @@ fun Map<String, Any?>.toCloudStreamPluginMetadata(): CloudStreamPluginMetadata {
         status = when (this["status"]?.toString()?.lowercase(Locale.ROOT)) {
             "disabled" -> CloudStreamPluginStatus.DISABLED
             else -> CloudStreamPluginStatus.INSTALLED
-        }
+        },
+        iconUrl = this["iconUrl"]?.toString(),
     )
 }

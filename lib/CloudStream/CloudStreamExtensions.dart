@@ -1121,11 +1121,13 @@ class CloudStreamExtensions extends Extension {
         internalName: internalName,
         downloadUrl: source.apkUrl!,
         repoUrl: source.repo,
-        version: source.version,
+        versionName: source.version,
         tvTypes: source.tvTypes,
         lang: source.lang,
         isNsfw: source.isNsfw ?? false,
         itemTypes: effectiveItemTypes,
+        iconUrl: source.iconUrl,
+        displayName: source.name,
       );
 
       if (result == null) {
@@ -1618,11 +1620,14 @@ class CloudStreamExtensions extends Extension {
     required String internalName,
     required String downloadUrl,
     String? repoUrl,
-    String? version,
+    String? pluginListUrl,
     List<String>? tvTypes,
     String? lang,
     bool isNsfw = false,
     List<int>? itemTypes,
+    String? iconUrl,
+    String? displayName,
+    String? versionName,
   }) async {
     try {
       isLoading.value = true;
@@ -1630,13 +1635,16 @@ class CloudStreamExtensions extends Extension {
 
       final metadata = {
         'internalName': internalName,
-        'downloadUrl': downloadUrl,
+        'name': displayName,
         'repoUrl': repoUrl,
-        'version': version,
+        'pluginListUrl': pluginListUrl,
+        'downloadUrl': downloadUrl,
+        'version': versionName,
         'tvTypes': tvTypes ?? [],
         'lang': lang,
         'isNsfw': isNsfw,
         'itemTypes': itemTypes ?? [],
+        'iconUrl': iconUrl,
       };
 
       final result = await platform.invokeMethod('installCloudStreamPlugin', {
