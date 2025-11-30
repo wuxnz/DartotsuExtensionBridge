@@ -47,6 +47,7 @@ class CloudStreamPluginRegistry(private val context: Context) {
 
     // Registry of MainAPI instances keyed by sourceId (internalName)
     private val apiRegistry = mutableMapOf<String, MainAPI>()
+    private val pluginApis = mutableMapOf<String, List<MainAPI>>()
 
     // Track which extractors we've added to the global list
     private val registeredExtractors = mutableSetOf<ExtractorApi>()
@@ -106,12 +107,18 @@ class CloudStreamPluginRegistry(private val context: Context) {
      * Register a loaded plugin in the registry.
      */
     private fun registerPlugin(loadedPlugin: LoadedPlugin) {
-        val mainApi = loadedPlugin.mainApi
         val internalName = loadedPlugin.internalName
+        val mainApis = loadedPlugin.mainApis
 
-        // Register MainAPI
-        apiRegistry[internalName] = mainApi
-        Log.d(TAG, "Registered MainAPI: ${mainApi.name} (${internalName})")
+        if (mainApis.isEmpty()) {
+            Log.w(TAG, "Plugin $internalName registered without MainAPIs; skipping")
+        }
+
+        pluginApis[internalName] = mainApis
+        for (api in mainApis) {
+            apiRegistry[api.name] = api
+            Log.d(TAG, "Registered MainAPI: ${api.name} (${internalName})")
+        }
 
         // Register extractors with the global list
         for (extractor in loadedPlugin.extractors) {
@@ -127,7 +134,10 @@ class CloudStreamPluginRegistry(private val context: Context) {
      * Unregister a plugin from the registry.
      */
     private fun unregisterPlugin(internalName: String) {
-        apiRegistry.remove(internalName)
+        val apisForPlugin = pluginApis.remove(internalName) ?: emptyList()
+        for (api in apisForPlugin) {
+            apiRegistry.entries.removeIf { it.value == api }
+        }
 
         // Remove extractors from global list
         val extractorsToRemove = registeredExtractors.filter { it.sourcePlugin == internalName }
@@ -182,6 +192,7 @@ class CloudStreamPluginRegistry(private val context: Context) {
      */
     fun getMainApi(sourceId: String): MainAPI? {
         return apiRegistry[sourceId]
+            ?: apiRegistry.values.firstOrNull { it.name.equals(sourceId, ignoreCase = true) }
     }
 
     /**

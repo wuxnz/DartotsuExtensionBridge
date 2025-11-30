@@ -1694,6 +1694,11 @@ class CloudStreamExtensions extends Extension {
     }
   }
 
+  /// Public helper to refresh all installed CloudStream lists from the native store.
+  Future<void> refreshInstalledLists() async {
+    await _refreshAllInstalledLists();
+  }
+
   /// Refresh all installed extension lists.
   Future<void> _refreshAllInstalledLists() async {
     await Future.wait([

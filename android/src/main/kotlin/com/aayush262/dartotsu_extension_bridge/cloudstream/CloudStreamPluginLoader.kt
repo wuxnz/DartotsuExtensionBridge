@@ -2,8 +2,12 @@ package com.aayush262.dartotsu_extension_bridge.cloudstream
 
 import android.content.Context
 import android.util.Log
+import com.lagradost.cloudstream3.APIHolder
 import com.lagradost.cloudstream3.MainAPI
+import com.lagradost.cloudstream3.plugins.BasePlugin
+import com.lagradost.cloudstream3.plugins.Plugin
 import com.lagradost.cloudstream3.utils.ExtractorApi
+import com.lagradost.cloudstream3.utils.extractorApis
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -37,7 +41,7 @@ class CloudStreamPluginLoader(private val context: Context) {
     private val classLoaderCache = mutableMapOf<String, DexClassLoader>()
 
     // Cache of loaded MainAPI instances keyed by plugin internalName
-    private val mainApiCache = mutableMapOf<String, MainAPI>()
+    private val mainApiCache = mutableMapOf<String, List<MainAPI>>()
 
     // Cache of loaded ExtractorApi instances from plugins
     private val extractorCache = mutableMapOf<String, MutableList<ExtractorApi>>()
@@ -53,10 +57,10 @@ class CloudStreamPluginLoader(private val context: Context) {
         withContext(Dispatchers.IO) {
             try {
                 // Check if already loaded
-                mainApiCache[internalName]?.let { mainApi ->
+                mainApiCache[internalName]?.let { mainApis ->
                     Log.d(TAG, "Plugin $internalName already loaded, returning cached instance")
                     return@withContext LoadedPlugin(
-                        mainApi = mainApi,
+                        mainApis = mainApis,
                         extractors = extractorCache[internalName] ?: emptyList(),
                         internalName = internalName
                     )
@@ -97,36 +101,53 @@ class CloudStreamPluginLoader(private val context: Context) {
                 )
                 classLoaderCache[internalName] = classLoader
 
-                // Load MainAPI class
                 val pluginClassName = manifest.pluginClassName
                 if (pluginClassName.isNullOrBlank()) {
                     Log.e(TAG, "Plugin class name not specified in manifest for $internalName")
                     return@withContext null
                 }
 
-                val mainApi = loadMainApi(classLoader, pluginClassName, internalName)
-                if (mainApi == null) {
-                    Log.e(TAG, "Failed to instantiate MainAPI for plugin $internalName")
+                val basePlugin = instantiatePlugin(classLoader, pluginClassName, internalName) ?: run {
+                    Log.e(TAG, "Failed to instantiate plugin class $pluginClassName for $internalName")
                     return@withContext null
                 }
 
-                mainApiCache[internalName] = mainApi
+                // Ensure we can capture what the plugin registers
+                val beforeProviders = snapshotRegisteredApis()
+                val beforeExtractors = snapshotRegisteredExtractors()
 
-                // Load extractors if any
-                val extractors = loadExtractors(classLoader, manifest, internalName)
-                if (extractors.isNotEmpty()) {
-                    extractorCache[internalName] = extractors.toMutableList()
+                basePlugin.filename = pluginDir.absolutePath
+
+                if (basePlugin is Plugin) {
+                    basePlugin.load(context)
+                } else {
+                    basePlugin.load()
                 }
 
-                Log.i(TAG, "Successfully loaded plugin $internalName with ${extractors.size} extractors")
+                val newlyRegisteredApis = snapshotRegisteredApis().subtract(beforeProviders)
+                if (newlyRegisteredApis.isEmpty()) {
+                    Log.w(TAG, "Plugin $internalName registered no MainAPI providers")
+                }
+
+                val newlyRegisteredExtractors = snapshotRegisteredExtractors().subtract(beforeExtractors)
+                if (newlyRegisteredExtractors.isNotEmpty()) {
+                    extractorCache[internalName] = newlyRegisteredExtractors.toMutableList()
+                }
+
+                mainApiCache[internalName] = newlyRegisteredApis.toList()
+
+                Log.i(
+                    TAG,
+                    "Successfully loaded plugin $internalName with ${newlyRegisteredApis.size} providers and ${newlyRegisteredExtractors.size} extractors"
+                )
 
                 LoadedPlugin(
-                    mainApi = mainApi,
-                    extractors = extractors,
+                    mainApis = newlyRegisteredApis.toList(),
+                    extractors = newlyRegisteredExtractors.toList(),
                     internalName = internalName
                 )
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading plugin $internalName: ${e.message}", e)
+            } catch (t: Throwable) {
+                Log.e(TAG, "Error loading plugin $internalName: ${t.message}", t)
                 null
             }
         }
@@ -161,14 +182,16 @@ class CloudStreamPluginLoader(private val context: Context) {
      * Get a loaded MainAPI instance by internal name.
      */
     fun getMainApi(internalName: String): MainAPI? {
-        return mainApiCache[internalName]
+        return mainApiCache[internalName]?.firstOrNull()
     }
 
     /**
      * Get all loaded MainAPI instances.
      */
     fun getAllMainApis(): Map<String, MainAPI> {
-        return mainApiCache.toMap()
+        return mainApiCache.mapNotNull { (key, apis) ->
+            apis.firstOrNull()?.let { key to it }
+        }.toMap()
     }
 
     /**
@@ -239,56 +262,34 @@ class CloudStreamPluginLoader(private val context: Context) {
         return null
     }
 
-    private fun loadMainApi(
+    private fun instantiatePlugin(
         classLoader: DexClassLoader,
         className: String,
         internalName: String
-    ): MainAPI? {
+    ): BasePlugin? {
         return try {
             val clazz = classLoader.loadClass(className)
             val instance = clazz.getDeclaredConstructor().newInstance()
-            
-            if (instance is MainAPI) {
-                // Initialize the MainAPI
-                instance.init()
+            if (instance is BasePlugin) {
                 instance
             } else {
-                Log.e(TAG, "Class $className is not a MainAPI for plugin $internalName")
+                Log.e(TAG, "Class $className is not a BasePlugin for $internalName")
                 null
             }
-        } catch (e: ClassNotFoundException) {
-            Log.e(TAG, "Class not found: $className for plugin $internalName", e)
-            null
         } catch (e: Exception) {
-            Log.e(TAG, "Error instantiating MainAPI $className for plugin $internalName: ${e.message}", e)
+            Log.e(TAG, "Error instantiating plugin class $className for $internalName: ${e.message}", e)
             null
         }
     }
 
-    private fun loadExtractors(
-        classLoader: DexClassLoader,
-        manifest: PluginManifest,
-        internalName: String
-    ): List<ExtractorApi> {
-        val extractors = mutableListOf<ExtractorApi>()
-
-        // Load extractors specified in manifest
-        manifest.extractorClasses?.forEach { extractorClassName ->
-            try {
-                val clazz = classLoader.loadClass(extractorClassName)
-                val instance = clazz.getDeclaredConstructor().newInstance()
-                
-                if (instance is ExtractorApi) {
-                    instance.sourcePlugin = internalName
-                    extractors.add(instance)
-                    Log.d(TAG, "Loaded extractor $extractorClassName from plugin $internalName")
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to load extractor $extractorClassName: ${e.message}")
-            }
+    private fun snapshotRegisteredApis(): Set<MainAPI> {
+        return synchronized(APIHolder.allProviders) {
+            APIHolder.allProviders.toSet()
         }
+    }
 
-        return extractors
+    private fun snapshotRegisteredExtractors(): Set<ExtractorApi> {
+        return extractorApis.toSet()
     }
 
     /**
@@ -338,7 +339,7 @@ class CloudStreamPluginLoader(private val context: Context) {
  * Represents a successfully loaded plugin.
  */
 data class LoadedPlugin(
-    val mainApi: MainAPI,
+    val mainApis: List<MainAPI>,
     val extractors: List<ExtractorApi>,
     val internalName: String
 )

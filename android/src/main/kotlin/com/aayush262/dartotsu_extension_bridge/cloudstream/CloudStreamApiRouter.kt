@@ -10,6 +10,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 
 /**
  * CloudStreamApiRouter handles routing of MethodChannel calls to the appropriate
@@ -164,11 +165,9 @@ class CloudStreamApiRouter(private val context: Context) {
 
         ioScope.launch {
             try {
-                val mainApi = registry.getMainApi(sourceId)
+                val mainApi = getOrLoadMainApi(sourceId)
                 if (mainApi == null) {
-                    withContext(Dispatchers.Main) {
-                        result.error("NOT_FOUND", "Plugin not found: $sourceId", null)
-                    }
+                    result.error("NOT_FOUND", "Plugin not found: $sourceId", null)
                     return@launch
                 }
 
@@ -229,7 +228,7 @@ class CloudStreamApiRouter(private val context: Context) {
 
         ioScope.launch {
             try {
-                val mainApi = registry.getMainApi(sourceId)
+                val mainApi = getOrLoadMainApi(sourceId)
                 if (mainApi == null) {
                     withContext(Dispatchers.Main) {
                         result.error("NOT_FOUND", "Plugin not found: $sourceId", null)
@@ -295,7 +294,7 @@ class CloudStreamApiRouter(private val context: Context) {
 
         ioScope.launch {
             try {
-                val mainApi = registry.getMainApi(sourceId)
+                val mainApi = getOrLoadMainApi(sourceId)
                 if (mainApi == null) {
                     withContext(Dispatchers.Main) {
                         result.error("NOT_FOUND", "Plugin not found: $sourceId", null)
@@ -338,7 +337,7 @@ class CloudStreamApiRouter(private val context: Context) {
 
         ioScope.launch {
             try {
-                val mainApi = registry.getMainApi(sourceId)
+                val mainApi = getOrLoadMainApi(sourceId)
                 if (mainApi == null) {
                     withContext(Dispatchers.Main) {
                         result.error("NOT_FOUND", "Plugin not found: $sourceId", null)
@@ -814,5 +813,32 @@ class CloudStreamApiRouter(private val context: Context) {
             "isDash" to isDash,
             "type" to type.name
         )
+    }
+
+    private suspend fun getOrLoadMainApi(sourceId: String): MainAPI? {
+        registry.getMainApi(sourceId)?.let { return it }
+
+        return withContext(Dispatchers.IO) {
+            val metadata = registry.getPluginMetadata(sourceId)
+            if (metadata == null) {
+                Log.w(TAG, "No metadata found for plugin $sourceId")
+                return@withContext null
+            }
+
+            val localPath = metadata.localPath
+            if (localPath.isNullOrBlank()) {
+                Log.w(TAG, "Plugin $sourceId has no localPath; cannot load")
+                return@withContext null
+            }
+
+            val pluginDir = File(localPath)
+            val loaded = registry.loadAndRegisterPlugin(pluginDir, metadata.internalName)
+            if (!loaded) {
+                Log.w(TAG, "Failed to load plugin $sourceId from $localPath")
+                return@withContext null
+            }
+
+            registry.getMainApi(sourceId)
+        }
     }
 }
