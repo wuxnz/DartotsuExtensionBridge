@@ -32,14 +32,16 @@ class DEpisode {
     } else {
       episodeStr = '';
     }
+    String? _stringify(dynamic value) => value?.toString();
+
     return DEpisode(
-      url: json['url'],
-      name: json['name'],
-      dateUpload: json['dateUpload'] ?? json['date_upload'],
-      scanlator: json['scanlator'],
-      thumbnail: json['thumbnail'],
-      description: json['description'],
-      filler: json['filler'],
+      url: _stringify(json['url']),
+      name: _stringify(json['name']),
+      dateUpload: _stringify(json['dateUpload'] ?? json['date_upload']),
+      scanlator: _stringify(json['scanlator']),
+      thumbnail: _stringify(json['thumbnail']),
+      description: _stringify(json['description']),
+      filler: json['filler'] is bool ? json['filler'] as bool : null,
       episodeNumber: episodeStr,
     );
   }

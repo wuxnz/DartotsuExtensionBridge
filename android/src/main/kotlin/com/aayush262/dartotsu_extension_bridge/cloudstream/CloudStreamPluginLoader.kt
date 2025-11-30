@@ -2,6 +2,10 @@ package com.aayush262.dartotsu_extension_bridge.cloudstream
 
 import android.content.Context
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
+import android.view.ContextThemeWrapper
+import androidx.appcompat.app.AppCompatActivity
 import com.lagradost.cloudstream3.APIHolder
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.plugins.BasePlugin
@@ -10,9 +14,12 @@ import com.lagradost.cloudstream3.utils.ExtractorApi
 import com.lagradost.cloudstream3.utils.extractorApis
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -119,7 +126,7 @@ class CloudStreamPluginLoader(private val context: Context) {
                 basePlugin.filename = pluginDir.absolutePath
 
                 if (basePlugin is Plugin) {
-                    basePlugin.load(context)
+                    loadPluginInstance(basePlugin)
                 } else {
                     basePlugin.load()
                 }
@@ -262,6 +269,23 @@ class CloudStreamPluginLoader(private val context: Context) {
         return null
     }
 
+    private suspend fun loadPluginInstance(plugin: Plugin) {
+        try {
+            plugin.load(context)
+        } catch (cast: ClassCastException) {
+            if (cast.message?.contains("AppCompatActivity") == true) {
+                Log.w(TAG, "Plugin ${plugin.javaClass.name} requested AppCompatActivity context; providing headless activity")
+                try {
+                    runPluginWithHeadlessActivity(plugin)
+                    return
+                } catch (fallbackError: Throwable) {
+                    Log.e(TAG, "Headless AppCompat fallback failed for ${plugin.javaClass.name}: ${fallbackError.message}", fallbackError)
+                }
+            }
+            throw cast
+        }
+    }
+
     private fun instantiatePlugin(
         classLoader: DexClassLoader,
         className: String,
@@ -331,6 +355,40 @@ class CloudStreamPluginLoader(private val context: Context) {
             }
 
             Log.i(TAG, "Cleared all cached plugins")
+        }
+    }
+
+    private suspend fun runPluginWithHeadlessActivity(plugin: Plugin) {
+        suspendCancellableCoroutine { continuation ->
+            Handler(Looper.getMainLooper()).post {
+                try {
+                    val headless = HeadlessAppCompatActivity(context)
+                    plugin.load(headless)
+                    if (continuation.isActive) {
+                        continuation.resume(Unit)
+                    }
+                } catch (t: Throwable) {
+                    if (continuation.isActive) {
+                        continuation.resumeWithException(t)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private class HeadlessAppCompatActivity(base: Context) : AppCompatActivity() {
+    init {
+        attachBaseContextCompat(base)
+    }
+
+    private fun attachBaseContextCompat(base: Context) {
+        try {
+            val method = ContextThemeWrapper::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
+            method.isAccessible = true
+            method.invoke(this, base)
+        } catch (t: Throwable) {
+            Log.w("HeadlessAppCompat", "Failed to attach base context: ${t.message}", t)
         }
     }
 }

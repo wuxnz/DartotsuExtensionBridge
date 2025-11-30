@@ -157,7 +157,7 @@ void main() {
           internalName: 'NewPlugin',
           downloadUrl: 'https://example.com/plugin.cs3',
           repoUrl: 'https://repo.example.com',
-          version: '1.0.0',
+          versionName: '1.0.0',
           lang: 'en',
         );
 
