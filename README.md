@@ -4,7 +4,6 @@ A Flutter plugin that provides a unified interface for managing multiple extensi
 
 ## Overview
 
-Archi
 The Dartotsu Extension Bridge enables Flutter applications to discover, install, update, and manage extensions from four different extension ecosystems:
 
 - **Aniyomi**: Anime and manga extensions (APK-based)
@@ -168,6 +167,9 @@ The CloudStream Extension Bridge provides comprehensive support for CloudStream 
 - Concurrent extension loading for improved performance
 - **Shared Extractor Service** for cross-bridge video extraction
 - Comprehensive error handling and logging
+- **Activity & Context Shims**: Headless `AppCompatActivity` fallback allows plugins that demand an activity context (e.g., SuperStream Beta) to run on the Android main thread without `ClassCastException`/`Looper.prepare()` issues.
+- **Sync Provider Shims**: Local stubs for `AccountManager.getSimklApi()` and related sync APIs unblock plugins such as CineStream that expect upstream CloudStream sync providers.
+- **csjson:// URL Encoding**: JSON payloads are encoded as `csjson://<base64>` on the Dart side and automatically decoded in `CloudStreamApiRouter`/`CloudStreamExtractorService` before reaching plugins/extractors, preventing `Uri.parse` crashes while keeping payloads intact.
 
 #### Architecture
 
@@ -634,6 +636,19 @@ if (result.success) {
 - Implemented repository persistence
 - Added automatic update detection
 - Created integration tests for complete workflows
+- Added main-thread headless `AppCompatActivity` execution path and URL sanitization/decoding helpers to keep plugin load and extractor flows stable when dealing with JSON payloads or SuperStream-style activity requirements.
+
+### November 2025 Stabilization Update
+
+- **Plugin Loader Parity**: `CloudStreamPluginLoader` now instantiates `Plugin`/`BasePlugin` classes exactly like upstream CloudStream, captures registered `MainAPI` instances, and records extractors for cross-bridge use.
+- **Headless Activity Fallback**: Automatically launches plugin `load()` calls on the Android main thread with a headless `AppCompatActivity` when a plugin references UI APIs.
+- **Sync Provider Surface**: Mirrors `AccountManager.getSimklApi()`/`getMalApi()`/`getAniListApi()`/`getLocalListApi()` on-device so CineStream and similar sync-aware plugins can operate.
+- **csjson Pipeline**: Dart models (`DMedia`, `DEpisode`, `VideoRepository`, `VideoPlayerViewModel`) encode any JSON-ish URL as `csjson://…`; the Android bridge and extractor service decode them before passing to CloudStream, eliminating `Scheme not starting with alphabetic character` errors.
+- **Extractor Service Decoding**: `CloudStreamExtractorService` decodes sanitized URLs/Referred before calling `loadExtractor`, so extractor discovery works even when servers provide structured parameters instead of plain links.
+- **Troubleshooting**:
+  1. Clear `/app_cloudstream_plugins` if plugin manifests change or a bundle is deleted externally, then rerun `initializePlugins()`.
+  2. Enable verbose logging (`ExtensionSearchRepository`, `CloudStreamBridge`) when debugging LnReader/CloudStream installs—errors surface via MethodChannel exceptions.
+  3. JSON playback fallbacks are expected for servers like StremioX; when extractor lookup fails, the sanitized embed string is routed back to Flutter, which now handles it safely.
 
 ### Code Quality Improvements
 
