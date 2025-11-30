@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import android.util.Base64
+import kotlin.text.Charsets
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
@@ -34,6 +36,23 @@ class CloudStreamApiRouter(private val context: Context) {
     companion object {
         private const val TAG = "CloudStreamApiRouter"
     }
+
+private fun decodeCloudStreamUrl(value: String?): String? {
+    if (value.isNullOrBlank()) return value
+    val prefix = "csjson://"
+    return if (value.startsWith(prefix)) {
+        val payload = value.substring(prefix.length)
+        try {
+            val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+            String(decoded, Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.w("CloudStreamApiRouter", "Failed to decode CloudStream JSON url: ${e.message}")
+            value
+        }
+    } else {
+        value
+    }
+}
 
     private val registry = CloudStreamPluginRegistry.getInstance(context)
     private val extractorService = CloudStreamExtractorService.getInstance(context)
@@ -329,7 +348,8 @@ class CloudStreamApiRouter(private val context: Context) {
             return
         }
 
-        val url = mediaMap?.get("url")?.toString()
+        val rawUrl = mediaMap?.get("url")?.toString()
+        val url = decodeCloudStreamUrl(rawUrl)
         if (url.isNullOrBlank()) {
             result.error("INVALID_ARGS", "media.url is required", null)
             return
@@ -376,7 +396,8 @@ class CloudStreamApiRouter(private val context: Context) {
             return
         }
 
-        val episodeUrl = episodeMap?.get("url")?.toString()
+        val rawEpisodeUrl = episodeMap?.get("url")?.toString()
+        val episodeUrl = decodeCloudStreamUrl(rawEpisodeUrl)
         if (episodeUrl.isNullOrBlank()) {
             result.error("INVALID_ARGS", "episode.url is required", null)
             return

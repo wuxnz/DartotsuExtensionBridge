@@ -45,7 +45,7 @@ class DMedia {
     }
 
     final rawUrl = _stringify(json['url']);
-    final sanitizedUrl = _CloudStreamUrlCodec.sanitize(rawUrl);
+    final sanitizedUrl = CloudStreamUrlCodec.sanitize(rawUrl);
 
     return DMedia(
       title: _stringify(json['title']),
@@ -65,10 +65,10 @@ class DMedia {
   }
 
   factory DMedia.withUrl(String url) {
-    final decoded = _CloudStreamUrlCodec.desanitize(url);
+    final decoded = CloudStreamUrlCodec.desanitize(url);
     return DMedia(
       title: '',
-      url: _CloudStreamUrlCodec.sanitize(decoded),
+      url: CloudStreamUrlCodec.sanitize(decoded) ?? decoded,
       rawUrl: decoded,
       cover: '',
       description: '',
@@ -81,7 +81,7 @@ class DMedia {
 
   Map<String, dynamic> toJson() => {
     'title': title,
-    'url': rawUrl ?? url,
+    'url': rawUrl ?? CloudStreamUrlCodec.desanitize(url),
     'cover': cover,
     'description': description,
     'author': author,
@@ -91,12 +91,12 @@ class DMedia {
   };
 }
 
-class _CloudStreamUrlCodec {
+class CloudStreamUrlCodec {
   static const String prefix = 'csjson://';
 
-  static String sanitize(String? raw) {
+  static String? sanitize(String? raw) {
     final value = raw?.trim();
-    if (value == null || value.isEmpty) return value ?? '';
+    if (value == null || value.isEmpty) return raw;
     final firstChar = value[0];
     if (firstChar != '{' && firstChar != '[') {
       return value;
@@ -105,7 +105,8 @@ class _CloudStreamUrlCodec {
     return '$prefix$encoded';
   }
 
-  static String desanitize(String value) {
+  static String desanitize(String? value) {
+    if (value == null) return '';
     if (value.startsWith(prefix)) {
       final payload = value.substring(prefix.length);
       try {

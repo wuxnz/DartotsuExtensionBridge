@@ -2,6 +2,7 @@ package com.aayush262.dartotsu_extension_bridge.cloudstream
 
 import android.content.Context
 import android.util.Log
+import android.util.Base64
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.utils.ExtractorApi
 import com.lagradost.cloudstream3.utils.ExtractorLink
@@ -56,14 +57,16 @@ class CloudStreamExtractorService(private val context: Context) {
      */
     suspend fun extract(url: String, referer: String? = null): ExtractorResult = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Extracting from URL: $url with referer: $referer")
+            val decodedUrl = decodeCloudStreamUrl(url)
+            val decodedReferer = referer?.let { decodeCloudStreamUrl(it) }
+            Log.d(TAG, "Extracting from URL: $decodedUrl with referer: $decodedReferer")
 
             val extractedLinks = mutableListOf<ExtractedLink>()
             val extractedSubtitles = mutableListOf<ExtractedSubtitle>()
 
             val success = loadExtractor(
-                url = url,
-                referer = referer,
+                url = decodedUrl,
+                referer = decodedReferer,
                 subtitleCallback = { subtitle ->
                     extractedSubtitles.add(subtitle.toExtractedSubtitle())
                 },
@@ -125,9 +128,12 @@ class CloudStreamExtractorService(private val context: Context) {
             val extractedLinks = mutableListOf<ExtractedLink>()
             val extractedSubtitles = mutableListOf<ExtractedSubtitle>()
 
+            val decodedUrl = decodeCloudStreamUrl(url)
+            val decodedReferer = referer?.let { decodeCloudStreamUrl(it) }
+
             extractor.getSafeUrl(
-                url = url,
-                referer = referer,
+                url = decodedUrl,
+                referer = decodedReferer,
                 subtitleCallback = { subtitle ->
                     extractedSubtitles.add(subtitle.toExtractedSubtitle())
                 },
@@ -240,6 +246,21 @@ class CloudStreamExtractorService(private val context: Context) {
             lang = lang,
             url = url
         )
+    }
+
+    private fun decodeCloudStreamUrl(value: String): String {
+        val prefix = "csjson://"
+        if (value.startsWith(prefix)) {
+            val payload = value.substring(prefix.length)
+            return try {
+                val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+                String(decoded, Charsets.UTF_8)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to decode CloudStream URL: ${e.message}")
+                value
+            }
+        }
+        return value
     }
 }
 
