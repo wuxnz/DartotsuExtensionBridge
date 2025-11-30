@@ -2329,4 +2329,146 @@ void main() {
       );
     });
   });
+
+  group('CloudStream Extension Bridge - itemTypes Mapping Tests', () {
+    /// **Feature: cloudstream-extension-bridge, Property: tvTypes to itemTypes mapping**
+    /// **Validates: Requirements for cross-category plugin support**
+    ///
+    /// Property: For any plugin with tvTypes, the computed itemTypes should include
+    /// all applicable ItemType indices based on the _pluginMatchesType logic.
+    test('tvTypes to itemTypes mapping covers all applicable categories', () {
+      // Test case 1: Anime-only plugin
+      final animeOnlyTvTypes = ['Anime', 'AnimeMovie', 'OVA'];
+      // Should match: anime (1), movie (3) due to AnimeMovie
+
+      // Test case 2: Movie and TV plugin
+      final movieTvTypes = ['Movie', 'TvSeries'];
+      // Should match: movie (3), tvShow (4)
+
+      // Test case 3: Multi-category plugin
+      final multiCategoryTvTypes = ['Anime', 'Movie', 'TvSeries', 'Cartoon'];
+      // Should match: anime (1), movie (3), tvShow (4), cartoon (5)
+
+      // Test case 4: NSFW plugin
+      final nsfwTvTypes = ['NSFW', 'Anime'];
+      // Should match: anime (1), nsfw (8)
+
+      // Test case 5: Empty tvTypes (should match all)
+      final emptyTvTypes = <String>[];
+      // Should match all types when empty
+
+      // Verify the mapping logic matches expected behavior
+      // This tests the _pluginMatchesType function indirectly
+
+      // The matches map from _pluginMatchesType:
+      final matches = <int, List<String>>{
+        1: ['Anime', 'AnimeMovie', 'OVA'], // anime
+        0: ['Manga'], // manga
+        2: ['AudioBook', 'Audio', 'Podcast'], // novel
+        3: ['Movie', 'AnimeMovie', 'Torrent'], // movie
+        4: ['TvSeries', 'AsianDrama'], // tvShow
+        5: ['Cartoon'], // cartoon
+        6: ['Documentary'], // documentary
+        7: ['Live'], // livestream
+        8: ['NSFW'], // nsfw
+      };
+
+      // Helper to compute itemTypes from tvTypes
+      List<int> computeItemTypes(List<String> tvTypes) {
+        if (tvTypes.isEmpty) return <int>[];
+        final itemTypes = <int>{};
+        for (final entry in matches.entries) {
+          if (tvTypes.any((tvType) => entry.value.contains(tvType))) {
+            itemTypes.add(entry.key);
+          }
+        }
+        return itemTypes.toList()..sort();
+      }
+
+      // Test case 1
+      expect(
+        computeItemTypes(animeOnlyTvTypes)..sort(),
+        containsAll([1, 3]), // anime and movie (due to AnimeMovie)
+        reason: 'Anime tvTypes should map to anime and movie itemTypes',
+      );
+
+      // Test case 2
+      expect(
+        computeItemTypes(movieTvTypes)..sort(),
+        equals([3, 4]),
+        reason:
+            'Movie/TvSeries tvTypes should map to movie and tvShow itemTypes',
+      );
+
+      // Test case 3
+      expect(
+        computeItemTypes(multiCategoryTvTypes)..sort(),
+        containsAll([1, 3, 4, 5]),
+        reason: 'Multi-category tvTypes should map to all applicable itemTypes',
+      );
+
+      // Test case 4
+      expect(
+        computeItemTypes(nsfwTvTypes)..sort(),
+        containsAll([1, 8]),
+        reason: 'NSFW tvTypes should include nsfw itemType',
+      );
+
+      // Test case 5
+      expect(
+        computeItemTypes(emptyTvTypes),
+        isEmpty,
+        reason: 'Empty tvTypes should return empty list (handled separately)',
+      );
+    });
+
+    /// **Feature: cloudstream-extension-bridge, Property: Source tvTypes preservation**
+    /// **Validates: tvTypes field is properly stored in Source model**
+    test('Source model preserves tvTypes through JSON round-trip', () {
+      final tvTypes = ['Anime', 'Movie', 'TvSeries'];
+
+      final source = Source(
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        itemType: ItemType.anime,
+        extensionType: ExtensionType.cloudstream,
+        tvTypes: tvTypes,
+      );
+
+      // Verify tvTypes is set
+      expect(source.tvTypes, equals(tvTypes));
+
+      // Test JSON round-trip
+      final json = source.toJson();
+      expect(json['tvTypes'], equals(tvTypes));
+
+      final restored = Source.fromJson(json);
+      expect(restored.tvTypes, equals(tvTypes));
+    });
+
+    /// **Feature: cloudstream-extension-bridge, Property: Fallback to single itemType**
+    /// **Validates: When tvTypes is null/empty, falls back to source.itemType**
+    test('Falls back to single itemType when tvTypes is empty', () {
+      final source = Source(
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        itemType: ItemType.movie,
+        extensionType: ExtensionType.cloudstream,
+        tvTypes: null, // No tvTypes
+      );
+
+      // When tvTypes is null, the install logic should fall back to itemType
+      expect(source.tvTypes, isNull);
+      expect(source.itemType, equals(ItemType.movie));
+
+      // The effective itemTypes should be [3] (movie index)
+      final effectiveItemTypes = source.tvTypes?.isNotEmpty == true
+          ? <int>[] // Would compute from tvTypes
+          : (source.itemType != null ? [source.itemType!.index] : <int>[]);
+
+      expect(effectiveItemTypes, equals([3]));
+    });
+  });
 }

@@ -32,6 +32,10 @@ class Source {
 
   ExtensionType? extensionType;
 
+  /// CloudStream tvTypes from plugin manifest (e.g., ['Anime', 'Movie', 'TvSeries'])
+  /// Used to compute all applicable ItemTypes for cross-category plugin support.
+  List<String>? tvTypes;
+
   Source({
     this.id = '',
     this.name = '',
@@ -48,6 +52,7 @@ class Source {
     this.extensionType = ExtensionType.mangayomi,
     this.apkUrl = '',
     this.apkName = '',
+    this.tvTypes,
   });
 
   Source.fromJson(Map<String, dynamic> json) {
@@ -66,6 +71,7 @@ class Source {
     repo = json['repo'];
     hasUpdate = json['hasUpdate'] ?? false;
     extensionType = ExtensionType.values[json['extensionType'] ?? 0];
+    tvTypes = (json['tvTypes'] as List?)?.map((e) => e.toString()).toList();
   }
 
   Map<String, dynamic> toJson() => {
@@ -84,6 +90,7 @@ class Source {
     'repo': repo,
     'hasUpdate': hasUpdate,
     'extensionType': extensionType?.index ?? 0,
+    'tvTypes': tvTypes,
   };
 }
 

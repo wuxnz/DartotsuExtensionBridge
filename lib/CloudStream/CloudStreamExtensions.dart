@@ -11,6 +11,10 @@ import 'package:install_plugin/install_plugin.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+const _megaProviderInternalName = 'megaprovider';
+const _megaRepoListUrl =
+    'https://raw.githubusercontent.com/recloudstream/cs-repos/master/repos-db.json';
+
 class CloudStreamExtensionGroup {
   CloudStreamExtensionGroup({
     required this.id,
@@ -93,6 +97,7 @@ class CloudStreamExtensions extends Extension {
   };
 
   final Map<String, List<Source>> _groupSources = {};
+  List<String>? _cachedMegaRepoUrls;
 
   @override
   bool get supportsAnime => true;
@@ -277,10 +282,15 @@ class CloudStreamExtensions extends Extension {
 
       // Fetch extensions from all repositories (Requirement 2.2)
       final allSources = <Source>[];
+      final visitedRepos = <String>{};
 
       for (final repoUrl in repos) {
         try {
-          final sources = await _fetchSourcesForRepo(repoUrl, type);
+          final sources = await _fetchSourcesForRepo(
+            repoUrl,
+            type,
+            visitedRepos: visitedRepos,
+          );
           allSources.addAll(sources);
         } catch (e) {
           debugPrint('Error fetching from $repoUrl: $e');
@@ -387,8 +397,16 @@ class CloudStreamExtensions extends Extension {
 
   Future<List<Source>> _fetchSourcesForRepo(
     String repoUrl,
-    ItemType type,
-  ) async {
+    ItemType type, {
+    Set<String>? visitedRepos,
+  }) async {
+    final visited = visitedRepos ?? <String>{};
+    final normalizedUrl = repoUrl.trim();
+    if (normalizedUrl.isEmpty) return [];
+    if (!visited.add(normalizedUrl)) {
+      return [];
+    }
+
     final uri = Uri.tryParse(repoUrl);
     if (uri == null) {
       debugPrint('Invalid CloudStream repo URL: $repoUrl');
@@ -434,6 +452,7 @@ class CloudStreamExtensions extends Extension {
           type,
           repoUrl,
           decoded['name']?.toString(),
+          visited,
         );
         if (sources.isNotEmpty) {
           _registerExtensionGroup(
@@ -461,6 +480,7 @@ class CloudStreamExtensions extends Extension {
     ItemType type,
     String repoUrl,
     String? repoName,
+    Set<String> visitedRepos,
   ) async {
     final uri = Uri.tryParse(pluginListUrl);
     if (uri == null) {
@@ -486,6 +506,17 @@ class CloudStreamExtensions extends Extension {
       for (final entry in decoded) {
         if (entry is! Map) continue;
         final map = Map<String, dynamic>.from(entry);
+
+        final bundleSources = await _maybeExpandPluginBundle(
+          plugin: map,
+          type: type,
+          visitedRepos: visitedRepos,
+        );
+        if (bundleSources != null) {
+          sources.addAll(bundleSources);
+          continue;
+        }
+
         final tvTypes = (map['tvTypes'] as List?)
             ?.map((e) => e?.toString())
             .whereType<String>()
@@ -616,6 +647,12 @@ class CloudStreamExtensions extends Extension {
       return null;
     }
 
+    // Extract tvTypes for cross-category plugin support
+    final tvTypes = (plugin['tvTypes'] as List?)
+        ?.map((e) => e?.toString())
+        .whereType<String>()
+        .toList();
+
     final data = <String, dynamic>{
       'id': internalName,
       'name': name,
@@ -624,12 +661,13 @@ class CloudStreamExtensions extends Extension {
       'version': plugin['version']?.toString(),
       'versionLast': plugin['version']?.toString(),
       'itemType': type.index,
-      'isNsfw': (plugin['tvTypes'] as List?)?.contains('NSFW') ?? false,
+      'isNsfw': tvTypes?.contains('NSFW') ?? false,
       'apkUrl': url,
       'repo': repoUrl,
       'baseUrl': plugin['repositoryUrl'] ?? repoUrl,
       'extensionType': ExtensionType.cloudstream.index,
       'hasUpdate': false,
+      'tvTypes': tvTypes,
     };
 
     // best-effort apk name for installer UI
@@ -637,13 +675,78 @@ class CloudStreamExtensions extends Extension {
 
     final source = Source.fromJson(data)
       ..extensionType = ExtensionType.cloudstream
-      ..itemType = type;
+      ..itemType = type
+      ..tvTypes = tvTypes;
 
     if (repoName != null && repoName.isNotEmpty) {
       source.repo = repoName;
     }
 
     return source;
+  }
+
+  Future<List<Source>?> _maybeExpandPluginBundle({
+    required Map<String, dynamic> plugin,
+    required ItemType type,
+    required Set<String> visitedRepos,
+  }) async {
+    final internalName = plugin['internalName']?.toString().toLowerCase();
+    if (internalName != _megaProviderInternalName) {
+      return null;
+    }
+
+    final repoUrls = await _getMegaRepoUrls();
+    if (repoUrls.isEmpty) {
+      return <Source>[];
+    }
+
+    final expanded = <Source>[];
+    for (final repo in repoUrls) {
+      expanded.addAll(
+        await _fetchSourcesForRepo(repo, type, visitedRepos: visitedRepos),
+      );
+    }
+    return expanded;
+  }
+
+  Future<List<String>> _getMegaRepoUrls() async {
+    if (_cachedMegaRepoUrls != null) {
+      return _cachedMegaRepoUrls!;
+    }
+
+    try {
+      final response = await http.get(Uri.parse(_megaRepoListUrl));
+      if (response.statusCode != 200) {
+        debugPrint(
+          'Failed to fetch Mega repo list: HTTP ${response.statusCode}',
+        );
+        return [];
+      }
+
+      final decoded = json.decode(response.body);
+      if (decoded is! List) {
+        debugPrint('Mega repo list was not an array.');
+        return [];
+      }
+
+      final urls = <String>[];
+      for (final entry in decoded) {
+        if (entry is String) {
+          urls.add(entry);
+        } else if (entry is Map) {
+          final url = entry['url']?.toString();
+          if (url != null && url.isNotEmpty) {
+            urls.add(url);
+          }
+        }
+      }
+
+      _cachedMegaRepoUrls = urls;
+      return urls;
+    } catch (e) {
+      debugPrint('Error loading Mega repo list: $e');
+      return [];
+    }
   }
 
   /// Static method to parse JSON sources in an isolate
@@ -760,6 +863,12 @@ class CloudStreamExtensions extends Extension {
       }
 
       // Fall back to legacy platform channel methods
+      // Log this for telemetry - if we're hitting this path frequently,
+      // it indicates plugins aren't being properly registered in the store
+      debugPrint(
+        '[TELEMETRY] Falling back to legacy platform methods for $type extensions. '
+        'Plugin registry returned 0 entries.',
+      );
       final String methodName;
       switch (type) {
         case ItemType.anime:
@@ -799,6 +908,19 @@ class CloudStreamExtensions extends Extension {
 
       // Check for updates
       await checkForUpdates(type);
+
+      // Log telemetry for legacy path results
+      if (sources.isEmpty) {
+        debugPrint(
+          '[TELEMETRY] Legacy platform returned 0 extensions for $type. '
+          'No CloudStream plugins installed via either path.',
+        );
+      } else {
+        debugPrint(
+          '[TELEMETRY] Legacy platform returned ${sources.length} extensions for $type. '
+          'These may need migration to plugin store.',
+        );
+      }
 
       debugPrint(
         'Loaded ${sources.length} installed $type extensions from legacy platform',
@@ -981,15 +1103,29 @@ class CloudStreamExtensions extends Extension {
         'Installing CloudStream plugin: ${source.name} ($internalName)',
       );
 
+      // Compute all applicable itemTypes from tvTypes for cross-category support
+      // This ensures a plugin with tvTypes ['Anime', 'Movie'] appears in both tabs
+      final itemTypes = _computeItemTypesFromTvTypes(source.tvTypes);
+
+      // If no itemTypes computed from tvTypes, fall back to current itemType
+      final effectiveItemTypes = itemTypes.isNotEmpty
+          ? itemTypes
+          : (source.itemType != null ? [source.itemType!.index] : <int>[]);
+
+      debugPrint(
+        'Plugin ${source.name} itemTypes: $effectiveItemTypes (from tvTypes: ${source.tvTypes})',
+      );
+
       // Call the new native plugin installer
       final result = await installCloudStreamPlugin(
         internalName: internalName,
         downloadUrl: source.apkUrl!,
         repoUrl: source.repo,
         version: source.version,
+        tvTypes: source.tvTypes,
         lang: source.lang,
         isNsfw: source.isNsfw ?? false,
-        itemTypes: source.itemType != null ? [source.itemType!.index] : null,
+        itemTypes: effectiveItemTypes,
       );
 
       if (result == null) {
@@ -1010,6 +1146,26 @@ class CloudStreamExtensions extends Extension {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Compute all applicable ItemType indices from CloudStream tvTypes.
+  ///
+  /// Maps tvTypes like ['Anime', 'Movie', 'TvSeries'] to ItemType indices
+  /// so plugins appear in all relevant category tabs.
+  List<int> _computeItemTypesFromTvTypes(List<String>? tvTypes) {
+    if (tvTypes == null || tvTypes.isEmpty) {
+      return <int>[];
+    }
+
+    final itemTypes = <int>{};
+
+    for (final type in ItemType.values) {
+      if (_pluginMatchesType(tvTypes, type)) {
+        itemTypes.add(type.index);
+      }
+    }
+
+    return itemTypes.toList();
   }
 
   /// Legacy APK installation path (for backward compatibility with non-CloudStream extensions).

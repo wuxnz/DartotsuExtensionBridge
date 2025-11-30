@@ -23,6 +23,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.Locale
 import java.util.zip.ZipInputStream
 
 /**
@@ -40,6 +41,16 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
     companion object {
         private const val TAG = "CloudStreamBridge"
         private const val CLOUDSTREAM_PACKAGE_PREFIX = "com.lagradost"
+
+        private const val ITEM_MANGA = 0
+        private const val ITEM_ANIME = 1
+        private const val ITEM_NOVEL = 2
+        private const val ITEM_MOVIE = 3
+        private const val ITEM_TV = 4
+        private const val ITEM_CARTOON = 5
+        private const val ITEM_DOCUMENTARY = 6
+        private const val ITEM_LIVE = 7
+        private const val ITEM_NSFW = 8
     }
 
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -201,10 +212,22 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
                 val manifest = readManifest(extractedDir)
                 prepareDexFiles(extractedDir, metadata.internalName)
 
+                val manifestTvTypes = manifest?.tvTypes?.filterNotNull()
+                val resolvedTvTypes = when {
+                    !manifestTvTypes.isNullOrEmpty() -> manifestTvTypes
+                    metadata.tvTypes.isNotEmpty() -> metadata.tvTypes
+                    else -> emptyList()
+                }
+
+                val resolvedItemTypes = resolveItemTypes(metadata.itemTypes, resolvedTvTypes)
+
                 val saved = pluginStore.upsertPlugin(
                     metadata.copy(
                         version = manifest?.version?.toString() ?: metadata.version,
                         localPath = extractedDir.absolutePath,
+                        tvTypes = resolvedTvTypes,
+                        itemTypes = resolvedItemTypes,
+                        lang = metadata.lang ?: manifest?.language ?: metadata.lang,
                     ),
                 )
 
@@ -270,7 +293,15 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
     private fun getInstalledExtensions(itemType: Int, result: MethodChannel.Result) {
         ioScope.launch {
             val pluginBacked = runCatching {
-                pluginStore.listPlugins()
+                val allPlugins = pluginStore.listPlugins()
+                
+                // Log warning for plugins with missing itemTypes (aids debugging)
+                allPlugins.filter { it.itemTypes.isEmpty() }.forEach { plugin ->
+                    Log.w(TAG, "Plugin ${plugin.internalName} has no itemTypes set. " +
+                        "It will appear in all tabs. tvTypes: ${plugin.tvTypes}")
+                }
+                
+                allPlugins
                     .filter { it.matchesItemType(itemType) }
                     .map { it.toInstalledSourcePayload(itemType) }
             }.onFailure {
@@ -491,6 +522,38 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
         }
     }
 
+    private fun resolveItemTypes(existing: List<Int>, tvTypes: List<String>): List<Int> {
+        if (existing.isNotEmpty()) return existing
+        val mapped = mapTvTypesToItemTypes(tvTypes)
+        return if (mapped.isNotEmpty()) mapped else listOf(ITEM_ANIME)
+    }
+
+    private fun mapTvTypesToItemTypes(tvTypes: List<String>): List<Int> {
+        if (tvTypes.isEmpty()) return emptyList()
+        val normalized = tvTypes.map { it.lowercase(Locale.ROOT) }
+        val matches = mutableSetOf<Int>()
+
+        normalized.forEach { type ->
+            when (type) {
+                "manga" -> matches.add(ITEM_MANGA)
+                "novel", "audiobook", "audio", "podcast" -> matches.add(ITEM_NOVEL)
+                "movie", "torrent" -> matches.add(ITEM_MOVIE)
+                "animemovie" -> {
+                    matches.add(ITEM_ANIME)
+                    matches.add(ITEM_MOVIE)
+                }
+                "tvseries", "tvshow", "tv_show", "asiandrama" -> matches.add(ITEM_TV)
+                "cartoon" -> matches.add(ITEM_CARTOON)
+                "documentary" -> matches.add(ITEM_DOCUMENTARY)
+                "live", "livestream" -> matches.add(ITEM_LIVE)
+                "nsfw" -> matches.add(ITEM_NSFW)
+                "anime", "ova" -> matches.add(ITEM_ANIME)
+            }
+        }
+
+        return matches.toList()
+    }
+
     private fun extractBundle(bundle: File, internalName: String, repoKey: String?): File {
         val pluginDir = pluginStore.resolvePluginDirectory(repoKey, internalName)
         if (pluginDir.exists()) {
@@ -556,5 +619,7 @@ class CloudStreamBridge(private val context: Context) : MethodChannel.MethodCall
         val pluginClassName: String? = null,
         val version: Int? = null,
         val requiresResources: Boolean? = null,
+        val tvTypes: List<String>? = null,
+        val language: String? = null,
     )
 }
