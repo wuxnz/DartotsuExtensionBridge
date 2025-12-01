@@ -10,6 +10,9 @@ import 'package:http/http.dart' as http;
 import 'package:install_plugin/install_plugin.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import '../Extensions/Extensions.dart';
+import '../Models/Source.dart';
+import 'desktop/cloudstream_desktop_channel_handler.dart';
 
 const _megaProviderInternalName = 'megaprovider';
 const _megaRepoListUrl =
@@ -1013,7 +1016,7 @@ class CloudStreamExtensions extends Extension {
   Future<List<Source>> _loadExtensions(String methodName, ItemType type) async {
     try {
       // Invoke platform channel method (Requirement 10.1)
-      final dynamic result = await platform.invokeMethod(methodName);
+      final dynamic result = await _invokeCloudStreamMethod(methodName);
 
       // Handle null or empty response
       if (result == null) {
@@ -1563,7 +1566,7 @@ class CloudStreamExtensions extends Extension {
       isLoading.value = true;
       lastError.value = null;
 
-      final result = await platform.invokeMethod('initializePlugins');
+      final result = await _invokeCloudStreamMethod('initializePlugins');
       final resultMap = Map<String, dynamic>.from(result as Map);
 
       // Update plugin status
@@ -1586,7 +1589,7 @@ class CloudStreamExtensions extends Extension {
   /// Get the current plugin status from the native layer.
   Future<Map<String, dynamic>> refreshPluginStatus() async {
     try {
-      final result = await platform.invokeMethod('getPluginStatus');
+      final result = await _invokeCloudStreamMethod('getPluginStatus');
       final resultMap = Map<String, dynamic>.from(result as Map);
       pluginStatus.value = resultMap;
       return resultMap;
@@ -1599,7 +1602,7 @@ class CloudStreamExtensions extends Extension {
   /// List all installed CloudStream plugins from the native store.
   Future<List<Map<String, dynamic>>> listInstalledCloudStreamPlugins() async {
     try {
-      final result = await platform.invokeMethod(
+      final result = await _invokeCloudStreamMethod(
         'listInstalledCloudStreamPlugins',
       );
       return (result as List).map((e) => Map<String, dynamic>.from(e)).toList();
@@ -1647,10 +1650,10 @@ class CloudStreamExtensions extends Extension {
         'iconUrl': iconUrl,
       };
 
-      final result = await platform.invokeMethod('installCloudStreamPlugin', {
-        'metadata': metadata,
-        'repoKey': repoUrl,
-      });
+      final result = await _invokeCloudStreamMethod(
+        'installCloudStreamPlugin',
+        {'metadata': metadata, 'repoKey': repoUrl},
+      );
 
       final resultMap = Map<String, dynamic>.from(result as Map);
 
@@ -1676,9 +1679,10 @@ class CloudStreamExtensions extends Extension {
       isLoading.value = true;
       lastError.value = null;
 
-      final result = await platform.invokeMethod('uninstallCloudStreamPlugin', {
-        'internalName': internalName,
-      });
+      final result = await _invokeCloudStreamMethod(
+        'uninstallCloudStreamPlugin',
+        {'internalName': internalName},
+      );
 
       // Refresh installed lists
       await _refreshAllInstalledLists();
@@ -1724,7 +1728,7 @@ class CloudStreamExtensions extends Extension {
   /// CloudStream's extractor implementations.
   Future<ExtractorResult> extract(String url, {String? referer}) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:extract', {
+      final result = await _invokeCloudStreamMethod('cloudstream:extract', {
         'url': url,
         'referer': referer,
       });
@@ -1748,7 +1752,7 @@ class CloudStreamExtensions extends Extension {
     String? referer,
   }) async {
     try {
-      final result = await platform.invokeMethod(
+      final result = await _invokeCloudStreamMethod(
         'cloudstream:extractWithExtractor',
         {'extractorName': extractorName, 'url': url, 'referer': referer},
       );
@@ -1768,7 +1772,9 @@ class CloudStreamExtensions extends Extension {
   /// List all available extractors.
   Future<List<ExtractorInfo>> listExtractors() async {
     try {
-      final result = await platform.invokeMethod('cloudstream:listExtractors');
+      final result = await _invokeCloudStreamMethod(
+        'cloudstream:listExtractors',
+      );
       return (result as List)
           .map((e) => ExtractorInfo.fromJson(Map<String, dynamic>.from(e)))
           .toList();
@@ -1781,7 +1787,7 @@ class CloudStreamExtensions extends Extension {
   /// Get loaded plugins from the native registry.
   Future<List<Map<String, dynamic>>> getLoadedPlugins() async {
     try {
-      final result = await platform.invokeMethod(
+      final result = await _invokeCloudStreamMethod(
         'cloudstream:getLoadedPlugins',
       );
       return (result as List).map((e) => Map<String, dynamic>.from(e)).toList();
@@ -1789,6 +1795,21 @@ class CloudStreamExtensions extends Extension {
       debugPrint('Error getting loaded plugins: $e');
       return [];
     }
+  }
+
+  Future<dynamic> _invokeCloudStreamMethod(
+    String method, [
+    dynamic arguments,
+  ]) async {
+    if (Platform.isLinux || Platform.isWindows) {
+      final handler = CloudStreamDesktopChannelHandler.instance;
+      if (!handler.isSetup) {
+        await handler.setup();
+      }
+      return handler.bridge.handleMethodCall(MethodCall(method, arguments));
+    }
+
+    return platform.invokeMethod(method, arguments);
   }
 }
 

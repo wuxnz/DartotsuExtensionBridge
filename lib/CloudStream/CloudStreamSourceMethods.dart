@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartotsu_extension_bridge/Models/DEpisode.dart';
 import 'package:dartotsu_extension_bridge/Models/DMedia.dart';
 import 'package:dartotsu_extension_bridge/Models/Page.dart';
@@ -8,6 +10,7 @@ import 'package:dartotsu_extension_bridge/Models/Video.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../Extensions/SourceMethods.dart';
+import 'desktop/cloudstream_desktop_channel_handler.dart';
 
 /// CloudStream-specific implementation of SourceMethods interface.
 ///
@@ -28,11 +31,26 @@ class CloudStreamSourceMethods implements SourceMethods {
   bool get isManga => source.itemType?.index == 0;
   bool get isNovel => source.itemType?.index == 2;
 
+  /// Invoke a CloudStream method, routing to desktop bridge on Linux/Windows.
+  Future<dynamic> _invokeCloudStreamMethod(
+    String method, [
+    dynamic arguments,
+  ]) async {
+    if (Platform.isLinux || Platform.isWindows) {
+      final handler = CloudStreamDesktopChannelHandler.instance;
+      if (!handler.isSetup) {
+        await handler.setup();
+      }
+      return handler.bridge.handleMethodCall(MethodCall(method, arguments));
+    }
+    return platform.invokeMethod(method, arguments);
+  }
+
   @override
   Future<Pages> getPopular(int page) async {
     try {
       // Use the new cloudstream: prefixed method for loaded plugins
-      final result = await platform.invokeMethod('cloudstream:getPopular', {
+      final result = await _invokeCloudStreamMethod('cloudstream:getPopular', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'page': page,
@@ -51,7 +69,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<Pages> getLatestUpdates(int page) async {
     try {
-      final result = await platform.invokeMethod(
+      final result = await _invokeCloudStreamMethod(
         'cloudstream:getLatestUpdates',
         {
           'sourceId': source.id,
@@ -73,7 +91,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<Pages> search(String query, int page, List<dynamic> filters) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:search', {
+      final result = await _invokeCloudStreamMethod('cloudstream:search', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'query': query,
@@ -94,7 +112,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<DMedia> getDetail(DMedia media) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:getDetail', {
+      final result = await _invokeCloudStreamMethod('cloudstream:getDetail', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'media': {
@@ -121,18 +139,21 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<Video>> getVideoList(DEpisode episode) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:getVideoList', {
-        'sourceId': source.id,
-        'itemType': source.itemType?.index ?? 1,
-        'episode': {
-          'name': episode.name,
-          'url': episode.url,
-          'date_upload': episode.dateUpload,
-          'description': episode.description,
-          'episode_number': episode.episodeNumber,
-          'scanlator': episode.scanlator,
+      final result = await _invokeCloudStreamMethod(
+        'cloudstream:getVideoList',
+        {
+          'sourceId': source.id,
+          'itemType': source.itemType?.index ?? 1,
+          'episode': {
+            'name': episode.name,
+            'url': episode.url,
+            'date_upload': episode.dateUpload,
+            'description': episode.description,
+            'episode_number': episode.episodeNumber,
+            'scanlator': episode.scanlator,
+          },
         },
-      });
+      );
 
       // Handle the new response format with videos and subtitles
       if (result is Map) {
@@ -151,7 +172,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<PageUrl>> getPageList(DEpisode episode) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:getPageList', {
+      final result = await _invokeCloudStreamMethod('cloudstream:getPageList', {
         'sourceId': source.id,
         'itemType': source.itemType?.index ?? 1,
         'episode': {
@@ -174,8 +195,8 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<String?> getNovelContent(String chapterTitle, String chapterId) async {
     try {
-      final result = await platform
-          .invokeMethod('cloudstream:getNovelContent', {
+      final result =
+          await _invokeCloudStreamMethod('cloudstream:getNovelContent', {
             'sourceId': source.id,
             'itemType': source.itemType?.index ?? 2,
             'chapterTitle': chapterTitle,
@@ -192,10 +213,10 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<List<SourcePreference>> getPreference() async {
     try {
-      final result = await platform.invokeMethod('cloudstream:getPreference', {
-        'sourceId': source.id,
-        'itemType': source.itemType?.index ?? 1,
-      });
+      final result = await _invokeCloudStreamMethod(
+        'cloudstream:getPreference',
+        {'sourceId': source.id, 'itemType': source.itemType?.index ?? 1},
+      );
 
       if (result == null) return const [];
       if (result is String) return const [];
@@ -212,12 +233,13 @@ class CloudStreamSourceMethods implements SourceMethods {
   @override
   Future<bool> setPreference(SourcePreference pref, dynamic value) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:setPreference', {
-        'sourceId': source.id,
-        'itemType': source.itemType?.index ?? 1,
-        'key': pref.key,
-        'value': value,
-      });
+      final result =
+          await _invokeCloudStreamMethod('cloudstream:setPreference', {
+            'sourceId': source.id,
+            'itemType': source.itemType?.index ?? 1,
+            'key': pref.key,
+            'value': value,
+          });
 
       return result as bool? ?? false;
     } catch (e) {
@@ -230,7 +252,7 @@ class CloudStreamSourceMethods implements SourceMethods {
   /// This is useful when the video URL needs to be processed by an extractor.
   Future<List<Video>> extractVideos(String url, {String? referer}) async {
     try {
-      final result = await platform.invokeMethod('cloudstream:extract', {
+      final result = await _invokeCloudStreamMethod('cloudstream:extract', {
         'url': url,
         'referer': referer,
       });

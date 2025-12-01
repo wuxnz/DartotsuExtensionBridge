@@ -36,6 +36,11 @@ class Source {
   /// Used to compute all applicable ItemTypes for cross-category plugin support.
   List<String>? tvTypes;
 
+  /// Whether this source can be executed on desktop platforms.
+  /// For CloudStream: true if plugin has JS code, false if DEX-only.
+  /// For other extension types: typically true on their supported platforms.
+  bool? isExecutableOnDesktop;
+
   Source({
     this.id = '',
     this.name = '',
@@ -53,6 +58,7 @@ class Source {
     this.apkUrl = '',
     this.apkName = '',
     this.tvTypes,
+    this.isExecutableOnDesktop,
   });
 
   Source.fromJson(Map<String, dynamic> json) {
@@ -72,6 +78,7 @@ class Source {
     hasUpdate = json['hasUpdate'] ?? false;
     extensionType = ExtensionType.values[json['extensionType'] ?? 0];
     tvTypes = (json['tvTypes'] as List?)?.map((e) => e.toString()).toList();
+    isExecutableOnDesktop = json['isExecutableOnDesktop'] as bool?;
   }
 
   Map<String, dynamic> toJson() => {
@@ -91,6 +98,7 @@ class Source {
     'hasUpdate': hasUpdate,
     'extensionType': extensionType?.index ?? 0,
     'tvTypes': tvTypes,
+    'isExecutableOnDesktop': isExecutableOnDesktop,
   };
 }
 

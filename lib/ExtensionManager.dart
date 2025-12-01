@@ -5,8 +5,11 @@ import 'package:get/get.dart';
 
 import 'Aniyomi/AniyomiExtensions.dart';
 import 'Aniyomi/AniyomiSourceMethods.dart';
+import 'Aniyomi/desktop/aniyomi_desktop_channel_handler.dart';
+import 'Aniyomi/desktop/aniyomi_desktop_config.dart';
 import 'CloudStream/CloudStreamExtensions.dart';
 import 'CloudStream/CloudStreamSourceMethods.dart';
+import 'CloudStream/desktop/cloudstream_desktop_channel_handler.dart';
 import 'Extensions/Extensions.dart';
 import 'Extensions/SourceMethods.dart';
 import 'Lnreader/LnReaderExtensions.dart';
@@ -69,9 +72,39 @@ SourceMethods currentSourceMethods(Source source) {
   }
 }
 
-List<ExtensionType> get getSupportedExtensions => Platform.isAndroid
-    ? ExtensionType.values
-    : [ExtensionType.mangayomi, ExtensionType.lnreader];
+/// Get the list of supported extension types for the current platform.
+///
+/// On Android: All extension types are supported.
+/// On Desktop (Linux/Windows): Mangayomi, LnReader, and CloudStream are supported.
+/// Aniyomi is conditionally supported on desktop if the DEX runtime is available.
+List<ExtensionType> get getSupportedExtensions {
+  if (Platform.isAndroid) {
+    return ExtensionType.values;
+  }
+
+  // Desktop platforms
+  final supported = <ExtensionType>[
+    ExtensionType.mangayomi,
+    ExtensionType.lnreader,
+  ];
+
+  // CloudStream is supported on desktop with JS runtime when handler is set up
+  if (Platform.isLinux || Platform.isWindows) {
+    final handler = CloudStreamDesktopChannelHandler.instance;
+    if (handler.isSetup) {
+      supported.add(ExtensionType.cloudstream);
+    }
+  }
+
+  // Aniyomi is conditionally supported on desktop with DEX runtime
+  if ((Platform.isLinux || Platform.isWindows) &&
+      aniyomiDesktopConfig.enableDesktopAniyomi &&
+      isDesktopAniyomiAvailable) {
+    supported.add(ExtensionType.aniyomi);
+  }
+
+  return supported;
+}
 
 enum ExtensionType {
   mangayomi,

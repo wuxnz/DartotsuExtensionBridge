@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dartotsu_extension_bridge/Settings/Settings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
@@ -8,7 +9,10 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'Aniyomi/AniyomiExtensions.dart';
+import 'Aniyomi/desktop/aniyomi_desktop_channel_handler.dart';
+import 'Aniyomi/desktop/aniyomi_desktop_config.dart';
 import 'CloudStream/CloudStreamExtensions.dart';
+import 'CloudStream/desktop/cloudstream_desktop_channel_handler.dart';
 import 'ExtensionManager.dart';
 import 'Lnreader/LnReaderExtensions.dart';
 import 'Mangayomi/Eval/dart/model/source_preference.dart';
@@ -43,6 +47,35 @@ class DartotsuExtensionBridge {
 
     if (Platform.isAndroid) {
       Get.put(AniyomiExtensions(), tag: 'AniyomiExtensions');
+    }
+
+    // Initialize desktop CloudStream support before creating CloudStreamExtensions
+    if (Platform.isLinux || Platform.isWindows) {
+      try {
+        await initializeDesktopCloudStream();
+        debugPrint('Desktop CloudStream support initialized');
+      } catch (e) {
+        debugPrint('Failed to initialize desktop CloudStream: $e');
+        // Continue without CloudStream support on desktop
+      }
+
+      // Initialize desktop Aniyomi support if enabled
+      if (aniyomiDesktopConfig.enableDesktopAniyomi) {
+        try {
+          await initializeDesktopAniyomi();
+          debugPrint('Desktop Aniyomi support initialized');
+          // Register AniyomiExtensions for desktop when DEX runtime is available
+          if (isDesktopAniyomiAvailable) {
+            Get.put(AniyomiExtensions(), tag: 'AniyomiExtensions');
+          }
+        } catch (e) {
+          debugPrint('Failed to initialize desktop Aniyomi: $e');
+          // Continue without Aniyomi support on desktop
+        }
+      }
+    }
+
+    if (Platform.isAndroid || Platform.isLinux || Platform.isWindows) {
       Get.put(CloudStreamExtensions(), tag: 'CloudStreamExtensions');
     }
     Get.put(MangayomiExtensions(), tag: 'MangayomiExtensions');
