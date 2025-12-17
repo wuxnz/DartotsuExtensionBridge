@@ -18,6 +18,8 @@ import 'Lnreader/LnReaderExtensions.dart';
 import 'Mangayomi/Eval/dart/model/source_preference.dart';
 import 'Mangayomi/MangayomiExtensions.dart';
 import 'Mangayomi/Models/Source.dart';
+import 'package:aniya/eval_extensions/aniya_eval_extensions.dart';
+import 'package:aniya/eval_extensions/storage/aniya_eval_plugin_store.dart';
 
 late Isar isar;
 WebViewEnvironment? webViewEnvironment;
@@ -78,6 +80,11 @@ class DartotsuExtensionBridge {
     if (Platform.isAndroid || Platform.isLinux || Platform.isWindows) {
       Get.put(CloudStreamExtensions(), tag: 'CloudStreamExtensions');
     }
+    // Register Aniya eval-based extensions manager
+    final aniyaStore = AniyaEvalPluginStore();
+    final aniyaManager = AniyaEvalExtensions(store: aniyaStore);
+    Get.put(aniyaStore);
+    Get.put(aniyaManager, tag: 'AniyaEvalExtensions');
     Get.put(MangayomiExtensions(), tag: 'MangayomiExtensions');
     Get.put(LnReaderExtensions(), tag: 'LnReaderExtensions');
     Get.put(ExtensionManager());

@@ -18,6 +18,9 @@ import 'Mangayomi/MangayomiExtensions.dart';
 import 'Mangayomi/MangayomiSourceMethods.dart';
 import 'Models/Source.dart';
 import 'extension_bridge.dart';
+// Aniya eval-based plugin system
+import 'package:aniya/eval_extensions/aniya_eval_extensions.dart';
+import 'package:aniya/eval_extensions/aniya_eval_source_methods.dart';
 
 class ExtensionManager extends GetxController {
   ExtensionManager() {
@@ -66,6 +69,8 @@ SourceMethods currentSourceMethods(Source source) {
       return CloudStreamSourceMethods(source);
     case ExtensionType.lnreader:
       return LnReaderSourceMethods(source);
+    case ExtensionType.aniya:
+      return AniyaEvalSourceMethods(source);
     case null:
       // Default to Mangayomi for sources without explicit type
       return MangayomiSourceMethods(source);
@@ -103,6 +108,11 @@ List<ExtensionType> get getSupportedExtensions {
     supported.add(ExtensionType.aniyomi);
   }
 
+  // Always allow Aniya eval plugins on desktop (no DEX dependency)
+  if (Platform.isLinux || Platform.isWindows) {
+    supported.add(ExtensionType.aniya);
+  }
+
   return supported;
 }
 
@@ -110,7 +120,8 @@ enum ExtensionType {
   mangayomi,
   aniyomi,
   cloudstream,
-  lnreader;
+  lnreader,
+  aniya;
 
   Extension getManager() {
     switch (this) {
@@ -122,6 +133,8 @@ enum ExtensionType {
         return Get.find<CloudStreamExtensions>(tag: 'CloudStreamExtensions');
       case ExtensionType.lnreader:
         return Get.find<LnReaderExtensions>(tag: 'LnReaderExtensions');
+      case ExtensionType.aniya:
+        return Get.find<AniyaEvalExtensions>(tag: 'AniyaEvalExtensions');
     }
   }
 
@@ -136,6 +149,8 @@ enum ExtensionType {
         return 'CloudStream';
       case ExtensionType.lnreader:
         return 'LnReader';
+      case ExtensionType.aniya:
+        return 'Aniya';
     }
   }
 
@@ -155,6 +170,8 @@ enum ExtensionType {
       return ExtensionType.cloudstream;
     } else if (manager is LnReaderExtensions) {
       return ExtensionType.lnreader;
+    } else if (manager is AniyaEvalExtensions) {
+      return ExtensionType.aniya;
     }
     throw Exception('Unknown extension manager type');
   }

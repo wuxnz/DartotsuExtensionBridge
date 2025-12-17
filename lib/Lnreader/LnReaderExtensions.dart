@@ -18,6 +18,10 @@ class LnReaderExtensions extends Extension {
     initialize();
   }
 
+  bool _isHttpUrl(String value) {
+    return value.startsWith('http://') || value.startsWith('https://');
+  }
+
   // Store unmodified available list for later use (e.g., when uninstalling)
   final Rx<List<Source>> availableNovelExtensionsUnmodified = Rx([]);
 
@@ -102,11 +106,16 @@ class LnReaderExtensions extends Extension {
           final response = await http.get(Uri.parse(repoUrl));
 
           if (response.statusCode == 200) {
-            // Parse JSON response (Requirement 3.2)
-            final Map<String, dynamic> jsonData = json.decode(response.body);
-
-            // Extract plugins array from JSON
-            final List<dynamic> pluginsJson = jsonData['plugins'] ?? [];
+            final decoded = json.decode(response.body);
+            final List<dynamic> pluginsJson;
+            if (decoded is List) {
+              pluginsJson = decoded;
+            } else if (decoded is Map<String, dynamic>) {
+              final plugins = decoded['plugins'];
+              pluginsJson = plugins is List ? plugins : const [];
+            } else {
+              pluginsJson = const [];
+            }
 
             // Parse plugins using compute isolate for performance
             final sources = await compute(parsePlugins, {
@@ -166,14 +175,28 @@ class LnReaderExtensions extends Extension {
     return pluginsJson
         .map((pluginJson) {
           try {
+            if (pluginJson is! Map) {
+              return Source(id: '', name: '');
+            }
+
+            final pluginMap = Map<String, dynamic>.from(pluginJson);
+
             // Extract plugin metadata (Requirement 3.2, 3.5)
-            final id = pluginJson['id'] as String;
-            final name = pluginJson['name'] as String;
-            final version = pluginJson['version'] as String;
-            final lang = pluginJson['lang'] as String;
-            final icon = pluginJson['icon'] as String;
-            final site = pluginJson['site'] as String;
-            final code = pluginJson['code'] as String;
+            final id = pluginMap['id'] as String;
+            final name = pluginMap['name'] as String;
+            final version = pluginMap['version'] as String;
+            final lang = pluginMap['lang'] as String;
+            final icon = (pluginMap['iconUrl'] ?? pluginMap['icon']) as String?;
+            final site = pluginMap['site'] as String;
+            final codeOrUrl =
+                (pluginMap['code'] ?? pluginMap['url']) as String?;
+
+            if (icon == null || icon.trim().isEmpty) {
+              return Source(id: '', name: '');
+            }
+            if (codeOrUrl == null || codeOrUrl.trim().isEmpty) {
+              return Source(id: '', name: '');
+            }
 
             // Create Source object with LnReader-specific fields
             return Source(
@@ -189,7 +212,7 @@ class LnReaderExtensions extends Extension {
               hasUpdate: false,
               // Store the compiled JavaScript code in apkUrl field temporarily
               // This will be moved to a dedicated sourceCode field in task 5
-              apkUrl: code,
+              apkUrl: codeOrUrl,
             );
           } catch (e) {
             debugPrint('Failed to parse plugin: $e');
@@ -208,8 +231,25 @@ class LnReaderExtensions extends Extension {
       if (source.id?.trim().isEmpty ?? true) {
         throw Exception('Plugin ID is required for installation');
       }
-      if (source.apkUrl?.trim().isEmpty ?? true) {
+
+      final payload = source.apkUrl?.trim() ?? '';
+      if (payload.isEmpty) {
         throw Exception('Plugin source code is required for installation');
+      }
+
+      String? sourceCodeUrl;
+      String sourceCode;
+      if (_isHttpUrl(payload)) {
+        sourceCodeUrl = payload;
+        final response = await http.get(Uri.parse(payload));
+        if (response.statusCode != 200) {
+          throw Exception(
+            'Failed to fetch plugin source code: HTTP ${response.statusCode}',
+          );
+        }
+        sourceCode = response.body;
+      } else {
+        sourceCode = payload;
       }
 
       debugPrint('Installing LnReader plugin: ${source.name} (${source.id})');
@@ -233,7 +273,8 @@ class LnReaderExtensions extends Extension {
         lang: source.lang,
         iconUrl: source.iconUrl,
         baseUrl: source.baseUrl,
-        sourceCode: source.apkUrl, // Store JavaScript code
+        sourceCode: sourceCode,
+        sourceCodeUrl: sourceCodeUrl,
         itemType: ItemType.novel,
         isAdded: true,
         isActive: true,
@@ -250,7 +291,21 @@ class LnReaderExtensions extends Extension {
       final currentInstalled = List<Source>.from(
         installedNovelExtensions.value,
       );
-      currentInstalled.add(source);
+
+      final storedSource = Source(
+        id: source.id,
+        name: source.name,
+        version: source.version,
+        lang: source.lang,
+        iconUrl: source.iconUrl,
+        baseUrl: source.baseUrl,
+        apkUrl: sourceCode,
+        repo: source.repo,
+        itemType: ItemType.novel,
+        extensionType: ExtensionType.lnreader,
+        hasUpdate: false,
+      );
+      currentInstalled.add(storedSource);
       installedNovelExtensions.value = currentInstalled;
 
       // Remove from available list
@@ -360,8 +415,24 @@ class LnReaderExtensions extends Extension {
       // Fetch latest plugin version from repository (Requirement 11.1)
       // The source parameter should already contain the latest version data from checkForUpdates
       // But we need to ensure we have the latest source code
-      String? latestSourceCode = source.apkUrl;
+      String? latestSourceCode = (source.apkName?.trim().isNotEmpty ?? false)
+          ? source.apkName?.trim()
+          : source.apkUrl?.trim();
       String? latestVersion = source.versionLast ?? source.version;
+      String? latestSourceCodeUrl;
+
+      if (latestSourceCode?.trim().isNotEmpty ?? false) {
+        if (_isHttpUrl(latestSourceCode!)) {
+          latestSourceCodeUrl = latestSourceCode;
+          final response = await http.get(Uri.parse(latestSourceCode));
+          if (response.statusCode != 200) {
+            throw Exception(
+              'Failed to fetch plugin source code: HTTP ${response.statusCode}',
+            );
+          }
+          latestSourceCode = response.body;
+        }
+      }
 
       // If source code is not provided, we need to fetch it from the repository
       if (latestSourceCode?.trim().isEmpty ?? true) {
@@ -373,18 +444,43 @@ class LnReaderExtensions extends Extension {
         try {
           final response = await http.get(Uri.parse(source.repo!));
           if (response.statusCode == 200) {
-            final Map<String, dynamic> jsonData = json.decode(response.body);
-            final List<dynamic> pluginsJson = jsonData['plugins'] ?? [];
+            final decoded = json.decode(response.body);
+            final List<dynamic> pluginsJson;
+            if (decoded is List) {
+              pluginsJson = decoded;
+            } else if (decoded is Map<String, dynamic>) {
+              final plugins = decoded['plugins'];
+              pluginsJson = plugins is List ? plugins : const [];
+            } else {
+              pluginsJson = const [];
+            }
 
             // Find the matching plugin
-            final pluginJson = pluginsJson.firstWhere(
-              (p) => p['id'] == source.id,
-              orElse: () => null,
-            );
+            final pluginJson = pluginsJson
+                .whereType<Map<String, dynamic>>()
+                .cast<Map<String, dynamic>?>()
+                .firstWhere((p) => p?['id'] == source.id, orElse: () => null);
 
             if (pluginJson != null) {
-              latestSourceCode = pluginJson['code'] as String?;
+              final codeOrUrl =
+                  (pluginJson['code'] ?? pluginJson['url']) as String?;
+              latestSourceCode = codeOrUrl;
               latestVersion = pluginJson['version'] as String?;
+
+              if (latestSourceCode?.trim().isNotEmpty ?? false) {
+                if (_isHttpUrl(latestSourceCode!)) {
+                  latestSourceCodeUrl = latestSourceCode;
+                  final codeResponse = await http.get(
+                    Uri.parse(latestSourceCode),
+                  );
+                  if (codeResponse.statusCode != 200) {
+                    throw Exception(
+                      'Failed to fetch plugin source code: HTTP ${codeResponse.statusCode}',
+                    );
+                  }
+                  latestSourceCode = codeResponse.body;
+                }
+              }
             } else {
               throw Exception('Plugin ${source.id} not found in repository');
             }
@@ -418,6 +514,7 @@ class LnReaderExtensions extends Extension {
         iconUrl: source.iconUrl ?? installedPlugin.iconUrl,
         baseUrl: source.baseUrl ?? installedPlugin.baseUrl,
         sourceCode: latestSourceCode,
+        sourceCodeUrl: latestSourceCodeUrl,
         itemType: ItemType.novel,
         isAdded: true,
         isActive: true,
@@ -445,6 +542,7 @@ class LnReaderExtensions extends Extension {
             iconUrl: source.iconUrl ?? s.iconUrl,
             baseUrl: source.baseUrl ?? s.baseUrl,
             apkUrl: latestSourceCode,
+            apkName: '',
             repo: source.repo ?? s.repo,
             itemType: ItemType.novel,
             extensionType: ExtensionType.lnreader,
@@ -514,13 +612,27 @@ class LnReaderExtensions extends Extension {
               debugPrint(
                 'Update available for ${installed.name}: ${installed.version} -> ${available.version}',
               );
-              return installed
-                ..hasUpdate = true
-                ..versionLast = available.version
-                ..apkUrl = available.apkUrl;
+              return Source(
+                id: installed.id,
+                name: installed.name,
+                version: installed.version,
+                versionLast: available.version,
+                lang: installed.lang,
+                iconUrl: installed.iconUrl,
+                baseUrl: installed.baseUrl,
+                apkUrl: installed.apkUrl,
+                apkName: available.apkUrl,
+                repo: installed.repo,
+                itemType: ItemType.novel,
+                extensionType: ExtensionType.lnreader,
+                hasUpdate: true,
+              );
             } else {
               // No update available (Requirement 10.3)
-              return installed..hasUpdate = false;
+              return installed
+                ..hasUpdate = false
+                ..versionLast = null
+                ..apkName = '';
             }
           } catch (e) {
             // Handle version comparison errors gracefully (Requirement 10.4)
@@ -530,7 +642,10 @@ class LnReaderExtensions extends Extension {
         }
 
         // No matching available plugin or missing version info
-        return installed..hasUpdate = false;
+        return installed
+          ..hasUpdate = false
+          ..versionLast = null
+          ..apkName = '';
       }).toList();
 
       // Update the reactive list
