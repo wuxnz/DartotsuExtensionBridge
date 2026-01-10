@@ -225,6 +225,45 @@ class LnReaderExtensions extends Extension {
   }
 
   @override
+  Future<List<Source>> getInstalledNovelExtensions() async {
+    try {
+      final installed = await isar.mSources
+          .filter()
+          .itemTypeEqualTo(ItemType.novel)
+          .sourceCodeLanguageEqualTo(SourceCodeLanguage.lnreader)
+          .isAddedEqualTo(true)
+          .findAll();
+
+      final sources = installed
+          .where((entry) => (entry.sourceId ?? '').trim().isNotEmpty)
+          .map(
+            (entry) => Source(
+              id: entry.sourceId,
+              name: entry.name,
+              version: entry.version,
+              versionLast: entry.versionLast,
+              lang: entry.lang,
+              iconUrl: entry.iconUrl,
+              baseUrl: entry.baseUrl,
+              apkUrl: entry.sourceCode,
+              repo: entry.repo,
+              itemType: ItemType.novel,
+              extensionType: ExtensionType.lnreader,
+              isNsfw: entry.isNsfw,
+              hasUpdate: false,
+            ),
+          )
+          .toList();
+
+      installedNovelExtensions.value = sources;
+      return sources;
+    } catch (e) {
+      debugPrint('Error loading installed LnReader plugins: $e');
+      return installedNovelExtensions.value;
+    }
+  }
+
+  @override
   Future<void> installSource(Source source) async {
     try {
       // Validate source has required fields (Requirement 4.1)
